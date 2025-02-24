@@ -6,6 +6,10 @@ https://testing-library.com/docs/react-testing-library/intro/
 
 See `App.test.tsx`, 20+ test cases in that file - Each test case above targets one or more aspects of the component functionality (login, search, recommendations, watchlist, dark mode, logout, etc.). 
 
+Off-nominal cases are also tested, like these:
+- handles login network error
+- RecommendationGenieTab shows no recommendations on network error
+  
 # [test_predict.py](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/test/test_predict.py)
 
 Here test cases are written to check if the recommendations made by bingesuggest-next are of good quality. <br/>

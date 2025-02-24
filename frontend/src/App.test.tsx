@@ -1,6 +1,10 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import App from "./artifact-component";
+import App from "./artifact-component"; // Updated import with extension
+import "@testing-library/jest-dom/extend-expect";
+// import jest, beforeEach, afterEach from "jest";
+import { beforeEach, afterEach, describe } from "@jest/globals";
+import { test, expect, jest } from "@jest/globals";
 
 // A helper to mock the global fetch
 const mockFetch = (data: any, ok = true) =>
@@ -70,6 +74,26 @@ describe("App Component", () => {
     await waitFor(() =>
       expect(
         screen.getByText("Login failed. Check your username and password.")
+      ).toBeInTheDocument()
+    );
+  });
+
+  test("handles login network error", async () => {
+    // Force a network error during login
+    (global.fetch as jest.Mock).mockImplementationOnce(() =>
+      Promise.reject(new Error("Network error"))
+    );
+    render(<App />);
+    fireEvent.change(screen.getByPlaceholderText(/username/i), {
+      target: { value: "netuser" },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/password/i), {
+      target: { value: "netfail" },
+    });
+    fireEvent.click(screen.getByText("Login"));
+    await waitFor(() =>
+      expect(
+        screen.getByText("An error occurred during login.")
       ).toBeInTheDocument()
     );
   });
@@ -336,6 +360,24 @@ describe("App Component", () => {
       expect(screen.getByText("Magic Movie 1")).toBeInTheDocument();
       expect(screen.getByText("Magic Movie 2")).toBeInTheDocument();
     });
+  });
+
+  test("RecommendationGenieTab shows no recommendations on network error", async () => {
+    (global.fetch as jest.Mock).mockImplementationOnce(() =>
+      Promise.reject(new Error("Network error"))
+    );
+    render(<App />);
+    fireEvent.click(screen.getByText("🔮 Recommendation Genie"));
+    fireEvent.change(
+      screen.getByPlaceholderText(
+        "E.g., 'A sci-fi adventure with a deep storyline'"
+      ),
+      { target: { value: "mysterious" } }
+    );
+    fireEvent.click(screen.getByText("Ask the Genie"));
+    await waitFor(() =>
+      expect(screen.queryByText("Magic Picks for You:")).not.toBeInTheDocument()
+    );
   });
 
   test("Dark mode toggles on checkbox change", () => {
