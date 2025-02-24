@@ -4,6 +4,21 @@ BingeSuggest-next is a modern movie suggestion and review web application. This 
 
 Prevous version: https://github.com/CSC510-Group13/BingeSuggest
 
+- [BingeSuggest-next](#bingesuggest-next)
+  - [Demo](#demo)
+  - [Features](#features)
+  - [Improvements over the previous version](#improvements-over-the-previous-version)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Running in Development](#running-in-development)
+    - [Building](#building)
+    - [Deploying](#deploying)
+  - [Project Structure](#project-structure)
+  - [Credits](#credits)
+  - [License](#license)
+
+
 ## Demo
 
 
