@@ -23,7 +23,7 @@ https://github.com/user-attachments/assets/7e24871a-9afb-4ef0-904c-d05a0ca8791c
 
 ## Improvements over the previous version
 
-- Performance: Frontend rewritten from scratch, utilizing client-side navigation to allow users to navigate to different part of the app at the speed of light.
+- Performance: Frontend rewritten from scratch, now a Single Page Application (SPA), utilizing client-side navigation to allow users to navigate to different part of the app at the speed of light.
 
 ## Getting Started
 
