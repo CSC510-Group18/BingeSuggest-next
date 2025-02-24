@@ -1,5 +1,9 @@
 _**Below we describe different test-case files that we have written for checking the working of bingesuggest-next!**_
 
+# frontend test with Jest
+
+See `App.test.tsx`, 20+ test cases in that file - Each test case above targets one or more aspects of the component functionality (login, search, recommendations, watchlist, dark mode, logout, etc.). 
+
 # [test_predict.py](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/test/test_predict.py)
 
 Here test cases are written to check if the recommendations made by bingesuggest-next are of good quality. <br/>
