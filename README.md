@@ -25,7 +25,10 @@ https://github.com/user-attachments/assets/7e24871a-9afb-4ef0-904c-d05a0ca8791c
 
 - Performance: Converted code to now a Single Page Application (SPA), utilizing client-side navigation that allows users to navigate to different part of the app at the speed of light. A significant performance increase of over 1000x on some pages!
 - Recommendation: Users now have access to AI-powered movie recommendation assistance through our Recommendation Genie.
-- UI Enhancements: Frontend rewritten from scratch featuring a new modern UI design.
+- UI Enhancements: Frontend rewritten from scratch featuring a new modern UI design. Intuitive interface and layout!
+- Dark Mode: Users now have access to a dark mode toggle at the top right.
+- Guest Users: It is now clear to guest users their approved features. Features they cannot access have restrictions. Different views for guests and users. No more error messages as a guest!
+- Various Bug Fixes
 
 ## Getting Started
 
