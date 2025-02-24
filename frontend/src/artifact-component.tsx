@@ -1214,6 +1214,17 @@ const RecommendationGenieTab: React.FC = () => {
 
 const App = () => {
   const [user, setUser] = useState(null);
+  // Add dark mode state
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Toggle dark class on html element based on darkMode
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     //  could check for a session cookie here to auto-login
@@ -1234,37 +1245,55 @@ const App = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">BingeSuggest</h1>
-      {user && (
-        <div className="mb-4 flex justify-end">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline">Logout</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Logging out will end your current session.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLogout}>
-                  Continue
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold">BingeSuggest</h1>
+        <div className="flex items-center space-x-2">
+          {/* Dark mode toggle */}
+          <label className="flex items-center cursor-pointer">
+            <div className="relative">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={darkMode}
+                onChange={() => setDarkMode(!darkMode)}
+              />
+              <div className="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
+              <div className="dot absolute w-6 h-6 bg-white rounded-full shadow -left-1 -top-1 transition"></div>
+            </div>
+            <span className="ml-3 text-sm text-gray-700">Dark Mode</span>
+          </label>
+          {/* ...existing logout code... */}
+          {user && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline">Logout</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Logging out will end your current session.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLogout}>
+                    Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
-      )}
-
+      </div>
       <Tabs defaultValue={user ? "search" : "login"} className="w-full">
         <TabsList className="grid w-full grid-cols-8 mb-4">
           {!user && <TabsTrigger value="login">Login</TabsTrigger>}
           <TabsTrigger value="search">Search</TabsTrigger>
           <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
-          <TabsTrigger value="recommendationGenie">🔮 Recommendation Genie</TabsTrigger>
+          <TabsTrigger value="recommendationGenie">
+            🔮 Recommendation Genie
+          </TabsTrigger>
           <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
           <TabsTrigger value="watched_history">Watched History</TabsTrigger>
           <TabsTrigger value="wall">Wall</TabsTrigger>
