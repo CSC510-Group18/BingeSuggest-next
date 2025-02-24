@@ -2,6 +2,8 @@
 
 BingeSuggest-next is a modern movie suggestion and review web application. This project is a complete rewrite by Teddy (tddschn) from the previous 1990-style jQuery/Flask version, incorporating modern React / Next.js and TypeScript practices with a rich UI.
 
+Prevous version: https://github.com/CSC510-Group13/BingeSuggest
+
 ## Features
 
 - **User Authentication:** Users can log in, create accounts, or continue as a guest. See [artifact-component.tsx](#file:artifact-component.tsx-context) for the login component.
