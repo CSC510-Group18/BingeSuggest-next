@@ -4,6 +4,14 @@ BingeSuggest-next is a modern movie suggestion and review web application. This 
 
 Prevous version: https://github.com/CSC510-Group13/BingeSuggest
 
+## Demo
+
+
+
+https://github.com/user-attachments/assets/7e24871a-9afb-4ef0-904c-d05a0ca8791c
+
+
+
 ## Features
 
 - **User Authentication:** Users can log in, create accounts, or continue as a guest. See [artifact-component.tsx](#file:artifact-component.tsx-context) for the login component.
