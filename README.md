@@ -23,7 +23,9 @@ https://github.com/user-attachments/assets/7e24871a-9afb-4ef0-904c-d05a0ca8791c
 
 ## Improvements over the previous version
 
-- Performance: Frontend rewritten from scratch, now a Single Page Application (SPA), utilizing client-side navigation to allow users to navigate to different part of the app at the speed of light.
+- Performance: Converted code to now a Single Page Application (SPA), utilizing client-side navigation that allows users to navigate to different part of the app at the speed of light. A significant performance increase of over 1000x on some pages!
+- Recommendation: Users now have access to AI-powered movie recommendation assistance through our Recommendation Genie.
+- UI Enhancements: Frontend rewritten from scratch featuring a new modern UI design.
 
 ## Getting Started
 
