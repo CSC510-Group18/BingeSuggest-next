@@ -1,6 +1,6 @@
 _**Below we describe different test-case files that we have written for checking the working of bingesuggest-next!**_
 
-# frontend test with React Testing Library
+# frontend test with React Testing Library and Jest
 
 https://testing-library.com/docs/react-testing-library/intro/
 
