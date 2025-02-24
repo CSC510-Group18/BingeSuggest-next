@@ -2,7 +2,7 @@
 Copyright (c) 2023 Aditya Pai, Ananya Mantravadi, Rishi Singhal, Samarth Shetty
 This code is licensed under MIT license (see LICENSE for details)
 
-@author: PopcornPicks
+@author: bingesuggest-next
 
 Movie Recommender Setup Script
 
@@ -10,8 +10,8 @@ This script is used to package and distribute the Movie Recommender project.
 It contains information about the project, including its name, version, authors,
 description, and other relevant details, to facilitate distribution and installation.
 
-For more information about the PopcornPicks project, visit:
-https://github.com/brwali/PopcornPicks
+For more information about the bingesuggest-next project, visit:
+https://github.com/brwali/bingesuggest-next
 """
 
 import setuptools
@@ -23,11 +23,11 @@ setuptools.setup(
     name="git-brwali",  # Replace with your own username
     version="1.0.0",
     author="Robert, Brandon, Nicholas, Nathan",
-    author_email="popcornpicks777@gmail.com",
+    author_email="bingesuggest-next777@gmail.com",
     description="A movie recommendation engine",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/brwali/PopcornPicks",
+    url="https://github.com/brwali/bingesuggest-next",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

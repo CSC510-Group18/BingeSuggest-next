@@ -21,7 +21,7 @@
 
 # Contents  
 
-- [Why use BingeSuggest?](#why-use-popcornpicks)
+- [Why use BingeSuggest?](#why-use-bingesuggest-next)
 - [Project Documentation](#documentation)
 - [Project Presentation Videos](#project-presentation-video)
 - [Brief Overview of Project](#project-description)
@@ -221,7 +221,7 @@ Please refer to the [CONTRIBUTING.md](https://github.com/CSC510-Group13/BingeSug
 
 <table>
   <tr>
-    <td><a href="https://github.com/adipai/PopcornPicks">Version 4</a></td>
+    <td><a href="https://github.com/adipai/bingesuggest-next">Version 4</a></td>
     <td align="center"><a href="https://github.com/adipai/"><img src="https://avatars.githubusercontent.com/u/29097083?v=4" width="75px;" alt=""/><br /><sub><b>Aditya Pai Brahmavar</b></sub></a></td>
     <td align="center"><a href="https://github.com/rishi2019194/"><img src="https://avatars.githubusercontent.com/u/58341663?v=4" width="75px;" alt=""/><br /><sub><b>Rishi Singhal</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/ananya173147/"><img src="https://avatars.githubusercontent.com/u/59045952?v=4" width="75px;" alt=""/><br /><sub><b>Ananya Mantravadi</b></sub></a><br /></td>

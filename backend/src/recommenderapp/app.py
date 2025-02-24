@@ -2,8 +2,9 @@
 Copyright (c) 2023 Nathan Kohen, Nicholas Foster, Brandon Walia, Robert Kenney
 This code is licensed under MIT license (see LICENSE for details)
 
-@author: PopcornPicks
+@author: bingesuggest-next
 """
+
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
@@ -61,12 +62,14 @@ comments: []
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")  # NEW: Set the OpenAI API key
 
+
 @app.route("/")
 def login_page():
     """
     Renders the login page.
     """
     return render_template("login.html")
+
 
 @app.route("/profile")
 def profile_page():
@@ -77,6 +80,7 @@ def profile_page():
         return render_template("profile.html")
     return render_template("login.html")
 
+
 @app.route("/wall")
 def wall_page():
     """
@@ -85,6 +89,7 @@ def wall_page():
     if user[1] is not None or user[1] == "guest":
         return render_template("wall.html")
     return render_template("login.html")
+
 
 @app.route("/review")
 def review_page():
@@ -95,6 +100,7 @@ def review_page():
         return render_template("review.html")
     return render_template("login.html")
 
+
 @app.route("/landing")
 def landing_page():
     """
@@ -104,6 +110,7 @@ def landing_page():
         return render_template("landing_page.html")
     return render_template("login.html")
 
+
 @app.route("/search_page")
 def search_page():
     """
@@ -112,6 +119,7 @@ def search_page():
     if user[1] is not None or user[1] == "guest":
         return render_template("search_page.html")
     return render_template("login.html")
+
 
 @app.route("/genreBased", methods=["POST"])
 def predict_g():
@@ -131,6 +139,7 @@ def predict_g():
     print(resp)
     return resp
 
+
 @app.route("/dirBased", methods=["POST"])
 def predict_d():
     """
@@ -147,6 +156,7 @@ def predict_d():
     recommendations, genres, imdb_id = recommendations[:10], genres[:10], imdb_id[:10]
     resp = {"recommendations": recommendations, "genres": genres, "imdb_id": imdb_id}
     return resp
+
 
 @app.route("/actorBased", methods=["POST"])
 def predict_a():
@@ -165,6 +175,7 @@ def predict_a():
     resp = {"recommendations": recommendations, "genres": genres, "imdb_id": imdb_id}
     return resp
 
+
 @app.route("/all", methods=["POST"])
 def predict_all():
     """
@@ -182,6 +193,7 @@ def predict_all():
     resp = {"recommendations": recommendations, "genres": genres, "imdb_id": imdb_id}
     return resp
 
+
 @app.route("/search", methods=["POST"])
 def search():
     """
@@ -194,6 +206,7 @@ def search():
     resp.status_code = 200
     return resp
 
+
 @app.route("/", methods=["POST"])
 def create_acc():
     """
@@ -203,6 +216,7 @@ def create_acc():
     create_account(g.db, data["email"], data["username"], data["password"])
     return request.data
 
+
 @app.route("/out", methods=["POST"])
 def signout():
     """
@@ -210,6 +224,7 @@ def signout():
     """
     user[1] = None
     return request.data
+
 
 @app.route("/log", methods=["POST"])
 def login():
@@ -223,6 +238,7 @@ def login():
     user[1] = resp
     return request.data
 
+
 @app.route("/friend", methods=["POST"])
 def friend():
     """
@@ -232,6 +248,7 @@ def friend():
     add_friend(g.db, data["username"], user[1])
     return request.data
 
+
 @app.route("/guest", methods=["POST"])
 def guest():
     """
@@ -240,6 +257,7 @@ def guest():
     data = json.loads(request.data)
     user[1] = data["guest"]
     return request.data
+
 
 @app.route("/review", methods=["POST"])
 def review():
@@ -252,6 +270,7 @@ def review():
     submit_review(g.db, user[1], movie_name, data.get("score"), data.get("review"))
     return request.data
 
+
 @app.route("/getWallData", methods=["GET"])
 def wall_posts():
     """
@@ -259,12 +278,14 @@ def wall_posts():
     """
     return get_wall_posts(g.db)
 
+
 @app.route("/getRecentMovies", methods=["GET"])
 def recent_movies():
     """
     Gets the recent movies of the active user
     """
     return get_recent_movies(g.db, user[1])
+
 
 @app.route("/getRecentFriendMovies", methods=["POST"])
 def recent_friend_movies():
@@ -274,12 +295,14 @@ def recent_friend_movies():
     data = json.loads(request.data)
     return get_recent_friend_movies(g.db, str(data))
 
+
 @app.route("/getUserName", methods=["GET"])
 def username():
     """
     Gets the username of the active user
     """
     return get_username(g.db, user[1])
+
 
 @app.route("/getFriends", methods=["GET"])
 def get_friend():
@@ -288,6 +311,7 @@ def get_friend():
     """
     return get_friends(g.db, user[1])
 
+
 @app.route("/feedback", methods=["POST"])
 def feedback():
     """
@@ -295,6 +319,7 @@ def feedback():
     """
     data = json.loads(request.data)
     return data
+
 
 @app.route("/sendMail", methods=["POST"])
 def send_mail():
@@ -305,6 +330,7 @@ def send_mail():
     user_email = data["email"]
     send_email_to_user(user_email, beautify_feedback_data(data))
     return data
+
 
 @app.route("/add_to_watchlist", methods=["POST"])
 def add_movie_to_watchlist():
@@ -348,6 +374,7 @@ def add_movie_to_watchlist():
     else:
         return jsonify({"status": "error", "message": "Movie not found"}), 404
 
+
 @app.route("/watchlist", methods=["GET"])
 def watchlist_page():
     """
@@ -356,6 +383,7 @@ def watchlist_page():
     if user[1] is not None or user[1] == "guest":
         return render_template("watchlist.html")
     return render_template("login.html")
+
 
 @app.route("/getWatchlistData", methods=["GET"])
 def get_watchlist():
@@ -376,6 +404,7 @@ def get_watchlist():
     )
     watchlist = cursor.fetchall()
     return jsonify(watchlist), 200
+
 
 @app.route("/deleteWatchlistData", methods=["POST"])
 def delete_watchlist_data():
@@ -399,6 +428,7 @@ def delete_watchlist_data():
             200,
         )
 
+
 @app.route("/get_api_key", methods=["GET"])
 def get_api_key():
     """
@@ -407,6 +437,7 @@ def get_api_key():
     if user[1] is not None and user[1] != "guest":
         return jsonify({"apikey": os.getenv("OMDB_API_KEY")})
     return jsonify({"error": "Unauthorized"}), 403
+
 
 @app.route("/add_to_watched_history", methods=["POST"])
 def add_movie_to_watched_history():
@@ -436,6 +467,7 @@ def add_movie_to_watched_history():
     status = "success" if was_added else "info"
     return jsonify({"status": status, "message": message}), 200
 
+
 @app.route("/watched_history", methods=["GET"])
 def watched_history_page():
     """
@@ -444,6 +476,7 @@ def watched_history_page():
     if user[1] is not None or user[1] == "guest":
         return render_template("watched_history.html")
     return render_template("login.html")
+
 
 @app.route("/getWatchedHistoryData", methods=["GET"])
 def get_watched_history():
@@ -465,6 +498,7 @@ def get_watched_history():
     watched_history = cursor.fetchall()
     return jsonify(watched_history), 200
 
+
 @app.route("/removeFromWatchedHistory", methods=["POST"])
 def remove_from_watched_history():
     """
@@ -485,12 +519,14 @@ def remove_from_watched_history():
     status = "success" if was_removed else "error"
     return jsonify({"status": status, "message": message}), 200
 
+
 @app.route("/success")
 def success():
     """
     Renders the success page.
     """
     return render_template("success.html")
+
 
 @app.route("/movie/<id>")
 def moviePage(id):
@@ -509,12 +545,14 @@ def moviePage(id):
     data = {"movieData": r.json(), "user": us}
     return render_template("movie.html", data=data)
 
+
 @app.route("/movieDiscussion/<id>", methods=["GET"])
 def getMovieDisccusion(id):
     """
     Returns the discussion store for the corresponding imdbId
     """
     return get_discussion(g.db, id)
+
 
 @app.route("/movieDiscussion/<id>", methods=["POST"])
 def postCommentOnMovieDisccusion(id):
@@ -524,6 +562,7 @@ def postCommentOnMovieDisccusion(id):
     data = request.get_json()
     data["imdb_id"] = id
     return create_or_update_discussion(g.db, data)
+
 
 @app.route("/get_imdb_id", methods=["POST"])
 def get_imdb_id():
@@ -544,7 +583,9 @@ def get_imdb_id():
     else:
         return jsonify({"error": "IMDb ID not found"}), 404
 
+
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 
 import logging
@@ -552,6 +593,7 @@ import openai
 from flask import Flask, jsonify, request
 
 logging.basicConfig(level=logging.DEBUG)
+
 
 @app.route("/ai_recommendations", methods=["POST"])
 def ai_recommendations():
@@ -571,8 +613,11 @@ def ai_recommendations():
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a movie recommendation AI."},
-                {"role": "user", "content": f"Recommend 5 movies based on: {user_query}"},
-            ]
+                {
+                    "role": "user",
+                    "content": f"Recommend 5 movies based on: {user_query}",
+                },
+            ],
         )
 
         recommendations = response.choices[0].message.content.split("\n")
@@ -583,7 +628,6 @@ def ai_recommendations():
     except Exception as e:
         logging.error(f"Error in AI recommendations: {str(e)}", exc_info=True)
         return jsonify({"error": "Error occurred"}), 500
-
 
 
 @app.before_request
@@ -600,6 +644,7 @@ def before_request():
         database=os.getenv("DB_NAME"),
     )
 
+
 @app.after_request
 def after_request(response):
     """
@@ -607,6 +652,7 @@ def after_request(response):
     """
     g.db.close()
     return response
+
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)

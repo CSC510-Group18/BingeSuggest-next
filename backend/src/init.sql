@@ -1,12 +1,12 @@
 -- Copyright (c) 2023 Nathan Kohen, Nicholas Foster, Brandon Walia, Robert Kenney
 -- This code is licensed under MIT license (see LICENSE for details)
 
--- @author: PopcornPicks
+-- @author: bingesuggest-next
 
-CREATE DATABASE IF NOT EXISTS PopcornPicksDB;
+CREATE DATABASE IF NOT EXISTS bingesuggest-nextDB;
 
--- Switch to the PopcornPicksDB database
-USE PopcornPicksDB;
+-- Switch to the bingesuggest-nextDB database
+USE bingesuggest-nextDB;
 
 -- Create the Users table
 CREATE TABLE IF NOT EXISTS Users (

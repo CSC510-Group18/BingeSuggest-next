@@ -1,8 +1,8 @@
 
-# _**PopcornPicks🍿** - **Your destination for movie recommendations**_
+# _**bingesuggest-next🍿** - **Your destination for movie recommendations**_
 
 ## Motivation 
-PopcornPicks is more than just a movie recommender system; it's a gateway to a world of cinematic adventures. With an ever-expanding library of films and a powerful recommendation algorithm, PopcornPicks is here to transform the way you discover, enjoy, and connect with movies.
+bingesuggest-next is more than just a movie recommender system; it's a gateway to a world of cinematic adventures. With an ever-expanding library of films and a powerful recommendation algorithm, bingesuggest-next is here to transform the way you discover, enjoy, and connect with movies.
 
 ## Introduction
 
@@ -12,7 +12,7 @@ PopcornPicks is more than just a movie recommender system; it's a gateway to a w
   align="right"
 />
 
-**"PopcornPicks: Your personalized movie guide!**
+**"bingesuggest-next: Your personalized movie guide!**
 
 - **Efficient:** Lightning-fast recommendations for movie buffs! 🚀
 - **Adaptable:** Tailor the recommendations to your taste.

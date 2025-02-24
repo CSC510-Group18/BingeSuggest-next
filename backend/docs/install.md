@@ -2,11 +2,11 @@
 
 ## Step 1: Git Clone the Repository
   
-    git clone https://github.com/CSC510-Group13/PopcornPicks.git
+    git clone https://github.com/CSC510-Group13/bingesuggest-next.git
     
   (OR) Download the .zip file on your local machine from the following link
   
-    https://github.com/CSC510-Group13/PopcornPicks/
+    https://github.com/CSC510-Group13/bingesuggest-next/
 
 ## EDIT: While trying to install this on my Mac, I found I needed to run the following (I have Homebrew installed) in order to complete step 2
 
@@ -34,15 +34,15 @@
  1. Launch MySQL Workbench
  2. Under MySQL Connections, Right click in the whitespace. Select `Rescan for Local MySQL Instances`. It should detect the server established in the previous step.
  3. Select the discovered Local instance and enter your password if created in server setup.
- 4. Click `File` > `Open SQL Script` then select `init.sql` in the `PopcornPicks/src` directory. This will create the tables required for the application's persistence.
- 5. Repeat above step for `movies.sql` file located in the `PopcornPicks/src` directory. This may take a few minutes.
- 6. Create .env file in the `PopcornPicks/src/recommenderapp` directory and add the following lines:
+ 4. Click `File` > `Open SQL Script` then select `init.sql` in the `bingesuggest-next/src` directory. This will create the tables required for the application's persistence.
+ 5. Repeat above step for `movies.sql` file located in the `bingesuggest-next/src` directory. This may take a few minutes.
+ 6. Create .env file in the `bingesuggest-next/src/recommenderapp` directory and add the following lines:
  
     ```
     DB_USER = 'root'
     DB_PASSWORD = 'your_password'
     DB_HOST = 'localhost'
-    DB_NAME = 'PopcornPicksDB'
+    DB_NAME = 'bingesuggest-nextDB'
     
     OMDB_API_KEY = <your_omdb_api_key>
     

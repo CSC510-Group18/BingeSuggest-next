@@ -1,14 +1,14 @@
-_**Below we describe different test-case files that we have written for checking the working of PopcornPicks!**_
+_**Below we describe different test-case files that we have written for checking the working of bingesuggest-next!**_
 
 # [test_predict.py](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/test/test_predict.py)
 
-Here test cases are written to check if the recommendations made by PopcornPicks are of good quality. <br/>
+Here test cases are written to check if the recommendations made by bingesuggest-next are of good quality. <br/>
 For example, for a movie input of "Spider-Man (2002)" and rating 5.0, the recommender returns "Masters of the Universe (1987)", which is a fair recommendation.
 
 # [test_search.py](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/test/test_search.py)
 
-Here test cases are written to check if the movie-searching feature of PopcornPicks returns similar outputs to the input string! <br/>
-For example, for keyword "love" the top-10 searches that PopcornPicks returns consist of the word "Love" making it related to the input keyword.
+Here test cases are written to check if the movie-searching feature of bingesuggest-next returns similar outputs to the input string! <br/>
+For example, for keyword "love" the top-10 searches that bingesuggest-next returns consist of the word "Love" making it related to the input keyword.
 
 # [test_util.py](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/test/test_util.py)
 

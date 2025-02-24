@@ -149,7 +149,7 @@
 ### send_email_to_user(recipient_email, categorized_data)
 
 **Utility function to send movie recommendations to user over email**<br/>
-**Input : email of recipient_email and output of [beautify_feedback_data](https://github.com/brwali/PopcornPicks/blob/master/docs/backend.md#beautify_feedback_datadata);<br/> Output: Sends email for valid email, otherwise raises exception in the server logs**<br/>
+**Input : email of recipient_email and output of [beautify_feedback_data](https://github.com/brwali/bingesuggest-next/blob/master/docs/backend.md#beautify_feedback_datadata);<br/> Output: Sends email for valid email, otherwise raises exception in the server logs**<br/>
 
 ### create_account(db, email, username, password)
 
@@ -266,7 +266,7 @@
 
 ## Item_based.py
 
-**Recommends movies to a user based on their past preferences and the preferences of users with similar tastes. Item-Item Collaborative Filtering (CF) is used to recommend similar movies based on user input. For example, if Joseph enjoyed Seven and Shutter Island, PopcornPicks might suggest The Prestige and Inception.**
+**Recommends movies to a user based on their past preferences and the preferences of users with similar tastes. Item-Item Collaborative Filtering (CF) is used to recommend similar movies based on user input. For example, if Joseph enjoyed Seven and Shutter Island, bingesuggest-next might suggest The Prestige and Inception.**
 
 ### recommend_for_new_user(user_rating)
 

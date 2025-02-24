@@ -2,7 +2,7 @@
 Copyright (c) 2023 Nathan Kohen, Nicholas Foster, Brandon Walia, Robert Kenney
 This code is licensed under MIT license (see LICENSE for details)
 
-@author: PopcornPicks
+@author: bingesuggest-next
  */
 // Function to handle Get Started button click
 function backToLandingPage() {
