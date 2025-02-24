@@ -1,79 +1,84 @@
-## [The Login Page](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/src/recommenderapp/templates/login.html)
+# BingeSuggest-next frontend
 
-The Login page is where users have the ability to log into an account they have created. If you do not have an account you can create an account on this page by clicking the create account button, and inputting an email, username, and password.
+BingeSuggest-next is a modern movie suggestion and review web application. This project is a complete rewrite by Teddy (tddschn) from the previous 1990-style jQuery/Flask version, incorporating modern React / Next.js and TypeScript practices with a rich UI.
 
-Moreover, if you do not want to create an account you can contiune as a guest. However, if you do contiune as a guest some of the functionality intended for users in the following pages will not be accessible to you.
+Prevous version: https://github.com/CSC510-Group13/BingeSuggest
 
-## [The Landing Page](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/src/recommenderapp/templates/landing_page.html)
+## Demo
 
-Ah, the Landing Page! This is where the magic begins, where users take their first steps into the world of bingesuggest-next. It's like the red carpet of your website - without the flashbulbs and paparazzi. 
 
-This template sets the stage for what's to come, the info on contributors and it better be good because the popcorn is popping, and the audience is waiting. 🍿
 
----
+https://github.com/user-attachments/assets/7e24871a-9afb-4ef0-904c-d05a0ca8791c
 
-## [Search Page](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/src/recommenderapp/templates/search_page.html)
 
-The Search Page, where movie dreams come true! Imagine this as your movie-loving detective's office, equipped with a magnifying glass to help users find their cinematic gems.
 
-Whether you're hunting for action-packed blockbusters, heartwarming rom-coms, or mind-bending sci-fi, this template's got your back. It's where the movie hunt begins. 🔍
+## Features
 
----
+- **User Authentication:** Users can log in, create accounts, or continue as a guest. See [artifact-component.tsx](#file:artifact-component.tsx-context) for the login component.
+- **Movie Search:** Real-time movie search powered by a dropdown that shows suggestions. Check out [MovieSearchDropdown.tsx](#file:MovieSearchDropdown.tsx-context) for details.
+- **Watchlist & Watched History:** Users can manage their watchlist and mark movies as watched.
+- **Reviews and Discussion:** Posting comments and reviews for movies, viewing recent reviews in a streamlined UI.
+- **Friend Activity:** Social feature to add and monitor friend activity.
+- **Recommendations:** Personalized movie recommendations based on genre, director, or actor.
 
-## [Review Page](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/src/recommenderapp/templates/review.html)
+## Improvements over the previous version
 
-The Review Page, where users can praise or rant about movies they recently watched! Rate movies out of ten stars and add comments to prodive context for your ratings!
+- Performance: Frontend rewritten from scratch, now a Single Page Application (SPA), utilizing client-side navigation to allow users to navigate to different part of the app at the speed of light.
 
-All reviews submitted will appear on the Wall!
+## Getting Started
 
----
+### Prerequisites
 
-## [Success!](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/src/recommenderapp/templates/success.html)
+- [Node.js](https://nodejs.org/) installed
+- [Bun](https://bun.sh) for fast development and build times
+- [Vite](https://vitejs.dev/) for development server and bundling
 
-Success! The moment users find the movie they've been looking for. This page is like the end credits of a fantastic film, complete with the feeling of satisfaction.
+### Installation
 
-Users are now ready to grab their popcorn, kick back, and enjoy the show. 🎉
+1. Clone the repository.
+2. Install dependencies with:
+   ```sh
+   bun install
+   ```
 
-## [The Profile Page](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/src/recommenderapp/templates/profile.html)
+### Running in Development
 
-The profile page is a hub for the user where they can see their recently rated movies, add a friend, and check our their friends list. 
+Start the development server with:
+```sh
+bun run dev
+```
 
-On the friends list, users can click on friends to see what movies they have recently rated.
+### Building
 
-### And now, the real show-stoppers:
+Build the production version with Vite and TypeScript using:
+```sh
+bun run build
+```
 
----
+Alternatively, to build a single file, use the Makefile target:
+```sh
+make build-single-file
+```
+This target installs dependencies, runs Vite build, and outputs the built file as specified in Makefile.
 
-## [Script.js](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/src/recommenderapp/static/script.js)
+### Deploying
 
-Script.js, the conductor of the orchestra! This JavaScript file keeps things moving, making sure your website performs its movie-magic smoothly.
+After building, you can deploy the output file. There is also a Makefile target to publish the build to a gist:
+```sh
+make publish-to-gist
+```
+This command creates a gist (with modifications) for easy sharing and deployment.
 
-With a bit of code wizardry, it handles user interactions, animations, and ensures everything runs like a well-choreographed dance scene in a musical.
+## Project Structure
 
----
+- **src/artifact-component.tsx:** Main application component including major features such as login, search, watchlist, and reviews.
+- **src/components/MovieSearchDropdown.tsx:** A reusable movie search dropdown component that uses real-time search via API.
+- **Makefile:** Provides commands for building and deploying (refer to the Makefile for more details).
 
-## [Wall.js](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/src/recommenderapp/static/script.js)
+## Credits
 
-Wall.js includes the functions that make the wall work, including ajax calls to the app getting the reviews from the users, and to omdb to get movie data.
+This project is a complete rewrite by Teddy (tddschn), modernizing the original 1990-style jQuery/Flask version into a robust React-based application.
 
----
+## License
 
-## [watched_history.js](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/src/recommenderapp/static/watchedHistory.js)
-
-WatchedHistory.js includes the functions that make the watched history work, including rendering the Watched History page, fetching the api key from the .env, and ajax calls to the app getting the watched history from the users, and to omdb to get movie data.
-
----
-
-## [Stylesheet.css](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/src/recommenderapp/static/stylesheet.css)
-
-Stylesheet.css, the fashion designer for your website! This file makes sure your website looks as stylish as a Hollywood star on the red carpet.
-
-It's where colors, fonts, and layouts are chosen to give your website its unique look and feel. Whether it's classic black and white or a colorful extravaganza, this file sets the tone.
-
-So, there you have it! Your templates and static files are the behind-the-scenes stars of bingesuggest-next, working together to create a blockbuster website experience. 🎬🍿
-
----
-
-## [watchlist.js](https://github.com/CSC510-Group13/BingeSuggest/blob/v7.0/src/recommenderapp/static/watchlist.js)
-
-watchlist.js includes the functions that make the watch list work, including rendering the Watch List page, fetching the api key from the .env, and ajax calls to the app getting the watch list from the users, and to omdb to get movie data.
+MIT
