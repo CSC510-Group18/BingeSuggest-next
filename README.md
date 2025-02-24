@@ -21,6 +21,10 @@ https://github.com/user-attachments/assets/7e24871a-9afb-4ef0-904c-d05a0ca8791c
 - **Friend Activity:** Social feature to add and monitor friend activity.
 - **Recommendations:** Personalized movie recommendations based on genre, director, or actor.
 
+## Improvements over the previous version
+
+- Performance: Frontend rewritten from scratch, utilizing client-side navigation to allow users to navigate to different part of the app with the speed of light
+
 ## Getting Started
 
 ### Prerequisites
