@@ -462,3 +462,14 @@ test("shows login message for guests", () => {
     expect(screen.getByText("Please log in to use the friends feature.")).toBeInTheDocument();
   });
 
+test("fetches and displays friends", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockFriends,
+    });
+
+    render(<FriendsPage user={mockUser} />);
+
+    await waitFor(() => expect(screen.getByText("friend1")).toBeInTheDocument());
+    expect(screen.getByText("friend2")).toBeInTheDocument();
+  });
