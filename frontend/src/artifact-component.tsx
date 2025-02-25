@@ -55,7 +55,11 @@ const LoginPage = ({ setUser }) => {
         setError("Login failed. Check your username and password.");
       }
     } catch (err) {
-      setError("An error occurred during login.");
+      setError(
+        err.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "An error occurred during login."
+      );
     }
   };
 
@@ -76,7 +80,11 @@ const LoginPage = ({ setUser }) => {
         setError(errorData.message || "Account creation failed.");
       }
     } catch (err) {
-      setError("An error occurred during account creation.");
+      setError(
+        err.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "An error occurred during account creation."
+      );
     }
   };
 
@@ -95,7 +103,11 @@ const LoginPage = ({ setUser }) => {
         setError("Login failed. Check your username and password.");
       }
     } catch (err) {
-      setError("An error occurred during login.");
+      setError(
+        err.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "An error occurred during guest login."
+      );
     }
     setUser("guest");
   };
@@ -206,6 +218,11 @@ const SearchPage = () => {
       }
     } catch (err) {
       console.error("An error occurred during search:", err);
+      alert(
+        err.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "An error occurred during search."
+      );
       setSearchResults([]);
       setIsDropdownOpen(false);
     }
@@ -310,6 +327,11 @@ const RecommendationsPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error fetching recommendations:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error fetching recommendations."
+      );
       setRecommendations([]);
     }
   };
@@ -378,6 +400,11 @@ const WatchlistPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error fetching watchlist:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error fetching watchlist."
+      );
     }
   };
 
@@ -407,6 +434,11 @@ const WatchlistPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error adding to watchlist:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error adding to watchlist."
+      );
     }
     setMovieToAdd("");
   };
@@ -427,6 +459,11 @@ const WatchlistPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error deleting from watchlist:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error deleting from watchlist."
+      );
     }
   };
   if (!user || user === "guest") {
@@ -525,6 +562,11 @@ const WatchedHistoryPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error fetching watched history:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error fetching watched history."
+      );
     }
   };
   const handleDeleteFromWatchedHistory = async (imdb_id) => {
@@ -543,6 +585,11 @@ const WatchedHistoryPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error deleting from watched history:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error deleting from watched history."
+      );
     }
   };
   useEffect(() => {
@@ -577,6 +624,11 @@ const WatchedHistoryPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error adding to watched history:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error adding to watched history."
+      );
     }
   };
 
@@ -690,6 +742,11 @@ const WallPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error fetching wall posts:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error fetching wall posts."
+      );
     }
   };
 
@@ -727,6 +784,11 @@ const WallPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error submitting review:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error submitting review."
+      );
     }
   };
 
@@ -858,6 +920,11 @@ const FriendsPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error fetching friends:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error fetching friends."
+      );
     }
   };
   const handleAddFriend = async () => {
@@ -879,6 +946,11 @@ const FriendsPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error adding friend:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error adding friend."
+      );
     }
   };
 
@@ -898,6 +970,11 @@ const FriendsPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error fetching friend activity:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error fetching friend activity."
+      );
     }
   };
 
@@ -1015,6 +1092,11 @@ const MoviePage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error fetching movie data:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error fetching movie data."
+      );
     }
   };
 
@@ -1031,6 +1113,11 @@ const MoviePage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error fetching discussion:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error fetching discussion."
+      );
     }
   };
 
@@ -1061,6 +1148,11 @@ const MoviePage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error posting comment:", error);
+      alert(
+        error.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error posting comment."
+      );
     }
   };
 
@@ -1174,6 +1266,11 @@ const RecommendationGenieTab: React.FC = () => {
       }
     } catch (err) {
       console.error("Error fetching AI recommendations:", err);
+      alert(
+        err.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "Error fetching AI recommendations."
+      );
     }
     setLoading(false);
   };
@@ -1240,6 +1337,11 @@ const App = () => {
       }
     } catch (err) {
       console.error("An error occurred during logout:", err);
+      alert(
+        err.message.includes("Failed to fetch")
+          ? "Backend API cannot be reached."
+          : "An error occurred during logout."
+      );
     }
   };
 
