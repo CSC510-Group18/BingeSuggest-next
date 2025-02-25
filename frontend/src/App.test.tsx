@@ -457,6 +457,19 @@ describe("App Component", () => {
   });
 });
 
+
+describe("FriendsPage Component", () => {
+  beforeEach(() => {
+    fetch.mockClear();
+  });
+
+  test("renders the component", () => {
+    render(<FriendsPage user={mockUser} />);
+    expect(screen.getByText("Add Friend")).toBeInTheDocument();
+    expect(screen.getByText("Friends List")).toBeInTheDocument();
+    expect(screen.getByText("Friend Activity")).toBeInTheDocument();
+  });
+
 test("shows login message for guests", () => {
     render(<FriendsPage user="guest" />);
     expect(screen.getByText("Please log in to use the friends feature.")).toBeInTheDocument();
