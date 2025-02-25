@@ -619,4 +619,12 @@ test("hides dropdown when API returns empty list", async () => {
 
     await waitFor(() => expect(screen.queryByRole("list")).not.toBeInTheDocument());
   });
+ test("handles API errors gracefully", async () => {
+    fetch.mockRejectedValueOnce(new Error("API Error"));
+
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Inc" } });
+
+    await waitFor(() => expect(screen.queryByRole("list")).not.toBeInTheDocument());
+  });
   
