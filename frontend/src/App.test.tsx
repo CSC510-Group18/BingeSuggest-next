@@ -607,3 +607,16 @@ test("does not search when input has less than 3 characters", async () => {
     expect(screen.getByText("Interstellar")).toBeInTheDocument();
     expect(screen.getByText("The Dark Knight")).toBeInTheDocument();
   });
+  
+test("hides dropdown when API returns empty list", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [],
+    });
+
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "xyz" } });
+
+    await waitFor(() => expect(screen.queryByRole("list")).not.toBeInTheDocument());
+  });
+  
