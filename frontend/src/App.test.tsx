@@ -553,3 +553,24 @@ test("handles fetch friend activity API failure", async () => {
     await waitFor(() => expect(window.alert).toHaveBeenCalledWith("Backend API cannot be reached."));
   });
 });
+
+const mockMovies = ["Inception", "Interstellar", "The Dark Knight"];
+
+describe("MovieSearchDropdown Component", () => {
+  beforeEach(() => {
+    fetch.mockClear();
+  });
+
+  test("renders input field with placeholder", () => {
+    render(<MovieSearchDropdown placeholder="Search movies..." onSelect={jest.fn()} />);
+    expect(screen.getByPlaceholderText("Search movies...")).toBeInTheDocument();
+  });
+
+test("does not search when input has less than 3 characters", async () => {
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, { target: { value: "In" } });
+
+    await waitFor(() => expect(fetch).not.toHaveBeenCalled());
+  });
