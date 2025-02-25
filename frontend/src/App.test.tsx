@@ -482,4 +482,24 @@ test("handles fetch friends API failure", async () => {
     await waitFor(() => expect(window.alert).toHaveBeenCalledWith("Backend API cannot be reached."));
   });
 
+test("adds a friend successfully", async () => {
+    fetch
+      .mockResolvedValueOnce({ ok: true }) // Add Friend API
+      .mockResolvedValueOnce({ ok: true, json: async () => mockFriends }); // Fetch Friends API after adding
+
+    render(<FriendsPage user={mockUser} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Enter friend's username"), {
+      target: { value: "newFriend" },
+    });
+
+    fireEvent.click(screen.getByText("Add Friend"));
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    expect(screen.getByText("friend1")).toBeInTheDocument();
+    expect(screen.getByText("friend2")).toBeInTheDocument();
+  });
+
+
+
 
