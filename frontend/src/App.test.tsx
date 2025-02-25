@@ -647,3 +647,20 @@ test("selecting a movie updates input and calls onSelect", async () => {
     expect(screen.getByRole("textbox")).toHaveValue("Inception");
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
+  
+test("closes dropdown when clicking outside", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMovies,
+    });
+
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Inc" } });
+
+    await waitFor(() => expect(screen.getByText("Inception")).toBeInTheDocument());
+
+    fireEvent.mouseDown(document.body);
+
+    await waitFor(() => expect(screen.queryByRole("list")).not.toBeInTheDocument());
+  });
+});
