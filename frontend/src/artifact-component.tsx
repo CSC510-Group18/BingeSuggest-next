@@ -218,11 +218,6 @@ const SearchPage = () => {
       }
     } catch (err) {
       console.error("An error occurred during search:", err);
-      alert(
-        err.message.includes("Failed to fetch")
-          ? "Backend API cannot be reached."
-          : "An error occurred during search."
-      );
       setSearchResults([]);
       setIsDropdownOpen(false);
     }
@@ -234,18 +229,43 @@ const SearchPage = () => {
     handleSearch(term);
   };
 
-  const handleSelectMovie = (movieTitle) => {
-    // Find the movie object with matching title to extract imdb_id
-    const selectedMovie = searchResults.find((movie) => movie === movieTitle);
-    if (selectedMovie) {
-      const imdbId = selectedMovie.split("(").pop().split(")")[0].trim(); //Extracting from parentheses
-      //redirect to the new movie page
-      window.location.href = `/movie/${imdbId}`;
+const handleSelectMovie = async (movieTitle) => {
+  console.log("Selected movie:", movieTitle); // Debugging
+
+  try {
+    // Fetch IMDb ID using new `/get_imdb_id` route
+    const response = await fetch(`${API_BASE_URL}/get_imdb_id`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ movie_name: movieTitle }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const imdbId = data.imdb_id;
+
+      if (imdbId) {
+        console.log("Redirecting to IMDb:", `https://www.imdb.com/title/${imdbId}/`);
+
+        // Open IMDb page in a new tab
+        window.open(`https://www.imdb.com/title/${imdbId}/`, "_blank");
+      } else {
+        console.error("IMDb ID not found for:", movieTitle);
+      }
+    } else {
+      console.error("Failed to fetch IMDb ID for:", movieTitle);
     }
-    setSearchTerm("");
-    setSearchResults([]);
-    setIsDropdownOpen(false);
-  };
+  } catch (error) {
+    console.error("Error fetching IMDb ID:", error);
+  }
+
+  setSearchTerm("");
+  setSearchResults([]);
+  setIsDropdownOpen(false);
+};
+
+
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
