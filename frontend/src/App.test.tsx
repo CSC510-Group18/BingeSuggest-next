@@ -627,4 +627,23 @@ test("hides dropdown when API returns empty list", async () => {
 
     await waitFor(() => expect(screen.queryByRole("list")).not.toBeInTheDocument());
   });
-  
+
+test("selecting a movie updates input and calls onSelect", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMovies,
+    });
+
+    const onSelectMock = jest.fn();
+    render(<MovieSearchDropdown onSelect={onSelectMock} />);
+
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Inc" } });
+
+    await waitFor(() => expect(screen.getByText("Inception")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText("Inception"));
+
+    expect(onSelectMock).toHaveBeenCalledWith("Inception");
+    expect(screen.getByRole("textbox")).toHaveValue("Inception");
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+  });
