@@ -456,3 +456,9 @@ describe("App Component", () => {
     expect(commentInput).toBeDisabled();
   });
 });
+
+test("shows login message for guests", () => {
+    render(<FriendsPage user="guest" />);
+    expect(screen.getByText("Please log in to use the friends feature.")).toBeInTheDocument();
+  });
+
