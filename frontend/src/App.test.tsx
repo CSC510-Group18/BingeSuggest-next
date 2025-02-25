@@ -574,3 +574,22 @@ test("does not search when input has less than 3 characters", async () => {
 
     await waitFor(() => expect(fetch).not.toHaveBeenCalled());
   });
+
+  test("calls API when input length is 3 or more characters", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMovies,
+    });
+
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, { target: { value: "Inc" } });
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith(
+      "http://127.0.0.1:5000/search",
+      expect.objectContaining({
+        method: "POST",
+      })
+    ));
+  });
