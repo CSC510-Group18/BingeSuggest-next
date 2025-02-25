@@ -14,7 +14,7 @@ Prevous version: https://github.com/CSC510-Group13/BingeSuggest
     - [Running in Development](#running-in-development)
     - [Building](#building)
     - [Deploying](#deploying)
-  - [Project Structure](#project-structure)
+    - [Web App Dir Structure](#web-app-dir-structure)
   - [Credits](#credits)
   - [License](#license)
 
@@ -95,7 +95,7 @@ make publish-to-gist
 ```
 This command creates a gist (with modifications) for easy sharing and deployment.
 
-## Project Structure
+### Web App Dir Structure
 
 - **src/artifact-component.tsx:** Main application component including major features such as login, search, watchlist, and reviews.
 - **src/components/MovieSearchDropdown.tsx:** A reusable movie search dropdown component that uses real-time search via API.
@@ -103,7 +103,7 @@ This command creates a gist (with modifications) for easy sharing and deployment
 
 ## Credits
 
-This project is a complete rewrite by Teddy (tddschn), modernizing the original 1990-style jQuery/Flask version into a robust React-based application.
+The web app is a complete rewrite by Teddy (tddschn), modernizing the original 1990-style jQuery/Flask version into a robust React-based application.
 
 ## License
 
