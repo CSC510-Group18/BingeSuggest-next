@@ -473,3 +473,13 @@ test("fetches and displays friends", async () => {
     await waitFor(() => expect(screen.getByText("friend1")).toBeInTheDocument());
     expect(screen.getByText("friend2")).toBeInTheDocument();
   });
+
+test("handles fetch friends API failure", async () => {
+    fetch.mockRejectedValueOnce(new Error("Failed to fetch"));
+
+    render(<FriendsPage user={mockUser} />);
+
+    await waitFor(() => expect(window.alert).toHaveBeenCalledWith("Backend API cannot be reached."));
+  });
+
+
