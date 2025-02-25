@@ -527,3 +527,16 @@ test("fetches and displays friend activity", async () => {
 
     await waitFor(() => expect(screen.getByText("Test Movie")).toBeInTheDocument());
   });
+
+test("handles fetch friend activity API failure", async () => {
+    fetch.mockRejectedValueOnce(new Error("Failed to fetch"));
+
+    render(<FriendsPage user={mockUser} />);
+
+    await waitFor(() => expect(screen.getByText("friend1")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText("friend1"));
+
+    await waitFor(() => expect(window.alert).toHaveBeenCalledWith("Backend API cannot be reached."));
+  });
+});
