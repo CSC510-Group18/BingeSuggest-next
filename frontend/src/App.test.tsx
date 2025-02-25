@@ -593,3 +593,17 @@ test("does not search when input has less than 3 characters", async () => {
       })
     ));
   });
+
+  test("displays results when API returns data", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMovies,
+    });
+
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Inc" } });
+
+    await waitFor(() => expect(screen.getByText("Inception")).toBeInTheDocument());
+    expect(screen.getByText("Interstellar")).toBeInTheDocument();
+    expect(screen.getByText("The Dark Knight")).toBeInTheDocument();
+  });
