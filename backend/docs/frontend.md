@@ -35,7 +35,7 @@ https://github.com/user-attachments/assets/7e24871a-9afb-4ef0-904c-d05a0ca8791c
 
 ### Installation
 
-1. Clone the repository.
+1. Clone the repository and cd into `frontend`
 2. Install dependencies with:
    ```sh
    bun install

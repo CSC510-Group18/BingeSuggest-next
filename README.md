@@ -8,8 +8,8 @@ Prevous version: https://github.com/CSC510-Group13/BingeSuggest
   - [Demo](#demo)
   - [Features](#features)
   - [Improvements over the previous version](#improvements-over-the-previous-version)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
+  - [Running the Backend](#running-the-backend)
+  - [Running the Frontend](#running-the-frontend)
     - [Installation](#installation)
     - [Running in Development](#running-in-development)
     - [Building](#building)
@@ -45,9 +45,15 @@ https://github.com/user-attachments/assets/7e24871a-9afb-4ef0-904c-d05a0ca8791c
 - Guest Users: It is now clear to guest users their approved features. Features they cannot access have restrictions. Different views for guests and users. No more error messages as a guest!
 - Various Bug Fixes
 
-## Getting Started
+## Running the Backend
 
-### Prerequisites
+Using gunicorn instead of vanilla Flask for better performance and scalability.
+
+```
+cd backend/src/recommenderapp && gunicorn app:app -b localhost:5000
+```
+
+## Running the Frontend
 
 - [Node.js](https://nodejs.org/) installed
 - [Bun](https://bun.sh) for fast development and build times
@@ -55,7 +61,7 @@ https://github.com/user-attachments/assets/7e24871a-9afb-4ef0-904c-d05a0ca8791c
 
 ### Installation
 
-1. Clone the repository.
+1. Clone the repository and cd into `frontend`
 2. Install dependencies with:
    ```sh
    bun install
