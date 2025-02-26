@@ -2,10 +2,11 @@ name: Unittest
 
 on:
   push:
-    branches: [ main ]
+    # branches: [ master ]
+  workflow_dispatch: 
 
-  schedule:
-    - cron: "00 23 * * *"
+#   schedule:
+#     - cron: "00 23 * * *"
 
 jobs:
   build:
@@ -52,55 +53,83 @@ jobs:
     #utils test cases
     - name: Running test cases for utils.py
       run: python test/test_util.py
+      working-directory: backend
     
     # sap test cases
     - name: Running test cases for watchlist
       run: python test_v7/sap/test_watchlist.py
+      working-directory: backend
     - name: Running test cases for predicting actor
       run: python test_v7/sap/test_predict_actor.py
+      working-directory: backend
     - name: Running test cases for predicting genre
       run: python test_v7/sap/test_predict_genre.py
+      working-directory: backend
     - name: Running test cases for predicting director
       run: python test_v7/sap/test_predict_director.py
+      working-directory: backend
     - name: Running test cases for predicting all
       run: python test_v7/sap/test_predict_all.py
+      working-directory: backend
     - name: Running test cases for searching
       run: python test_v7/sap/test_search.py
+      working-directory: backend
     - name: Running test cases for DB
       run: python test_v7/sap/test_DB.py
+      working-directory: backend
     - name: Running test cases for email
       run: python test_v7/sap/test_email_content.py
+      working-directory: backend
 
     # vsr test cases
     - name: Running test cases for predicting actor
       run: python test_v7/das/test_predict_actor.py
+      working-directory: backend
     - name: Running test cases for predicting genre
       run: python test_v7/das/test_predict_genre.py
+      working-directory: backend
     - name: Running test cases for predicting director
       run: python test_v7/das/test_predict_director.py
+      working-directory: backend
     - name: Running test cases for predicting all
       run: python test_v7/das/test_predict_all.py
+      working-directory: backend
     - name: Running test cases for searching
       run: python test_v7/das/test_search.py
+      working-directory: backend
 
     # das test cases
     - name: Running test cases for watchlist
       run: python test_v7/das/test_watchlist.py
+      working-directory: backend
     - name: Running test cases for predicting actor
       run: python test_v7/das/test_predict_actor.py
+      working-directory: backend
     - name: Running test cases for predicting genre
       run: python test_v7/das/test_predict_genre.py
+      working-directory: backend
     - name: Running test cases for predicting director
       run: python test_v7/das/test_predict_director.py
+      working-directory: backend
     - name: Running test cases for predicting all
       run: python test_v7/das/test_predict_all.py
+      working-directory: backend
     - name: Running test cases for searching
       run: python test_v7/das/test_search.py
+      working-directory: backend
     - name: Running test cases for DB
       run: python test_v7/das/test_DB.py
+      working-directory: backend
 
     # test cases for v7
     - name: Running test cases for adding to watched history
       run: python test_v7/watchedHistory/test_add_to_watched_history.py
+      working-directory: backend
     - name: Running test cases for removing from watched history
       run: python test_v7/watchedHistory/test_remove_from_watched_history.py
+      working-directory: backend
+      
+    # group8 test cases
+    - name: Running test cases for AI and IMDB
+      run: python -m unittest group8Tests.test_ai_and_get_imdb
+      working-directory: backend
