@@ -22,7 +22,11 @@ Prevous version: https://github.com/CSC510-Group13/BingeSuggest
 ## Demo
 
 
-https://drive.google.com/file/d/1-dDDALwgS7VVANqMezGMK5_OEquLFFK5/view?usp=sharing
+<iframe src="https://drive.google.com/file/d/1-dDDALwgS7VVANqMezGMK5_OEquLFFK5/preview" width="640" height="480" allow="autoplay"></iframe>
+
+We also compared this version to prevous version of BingeSuggest. The new version is a complete rewrite using modern technologies and practices, resulting in a more efficient and user-friendly application.
+
+View it on Google Drive: https://drive.google.com/file/d/1-dDDALwgS7VVANqMezGMK5_OEquLFFK5/view?usp=sharing
 
 ## Features
 
