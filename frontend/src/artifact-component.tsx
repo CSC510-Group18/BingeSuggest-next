@@ -319,7 +319,7 @@ const RecommendationsPage = ({ user }) => {
 
   const fetchRecommendations = async () => {
     if (!userMovies.trim()) {
-      setRecommendations([]); // Clear recommendations if input is empty
+      setRecommendations([]);
       return;
     }
 
@@ -333,7 +333,6 @@ const RecommendationsPage = ({ user }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         setRecommendations(
           data.recommendations.map((rec, index) => ({
             title: rec,
@@ -355,6 +354,32 @@ const RecommendationsPage = ({ user }) => {
       setRecommendations([]);
     }
   };
+
+  const handleSelectMovie = async (movieTitle) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/get_imdb_id`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ movie_name: movieTitle }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const imdbId = data.imdb_id;
+
+        if (imdbId) {
+          window.open(`https://www.imdb.com/title/${imdbId}/`, "_blank");
+        } else {
+          console.error("IMDb ID not found for:", movieTitle);
+        }
+      } else {
+        console.error("Failed to fetch IMDb ID for:", movieTitle);
+      }
+    } catch (error) {
+      console.error("Error fetching IMDb ID:", error);
+    }
+  };
+
   return (
     <div>
       <div className="mb-4">
@@ -385,16 +410,15 @@ const RecommendationsPage = ({ user }) => {
         </select>
       </div>
       <Button onClick={fetchRecommendations}>Get Recommendations</Button>
-
       <ul className="mt-4">
         {recommendations.map((movie, index) => (
           <li key={index} className="mb-2">
-            <a
-              href={`/movie/${movie.imdb_id}`}
-              className="text-blue-500 hover:underline"
+            <span
+              className="text-blue-500 hover:underline cursor-pointer"
+              onClick={() => handleSelectMovie(movie.title)}
             >
               {movie.title}
-            </a>
+            </span>
           </li>
         ))}
       </ul>
@@ -928,6 +952,12 @@ const FriendsPage = ({ user }) => {
   const [friendAdded, setFriendAdded] = useState(false);
   const [addTrigger, setAddTrigger] = useState(false);
 
+  useEffect(() => {
+    if (user && user !== "guest") {
+      fetchFriends();
+    }
+  }, [user, addTrigger]);
+
   const fetchFriends = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/getFriends`);
@@ -940,13 +970,9 @@ const FriendsPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error fetching friends:", error);
-      alert(
-        error.message.includes("Failed to fetch")
-          ? "Backend API cannot be reached."
-          : "Error fetching friends."
-      );
     }
   };
+
   const handleAddFriend = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/friend`, {
@@ -956,7 +982,6 @@ const FriendsPage = ({ user }) => {
       });
 
       if (response.ok) {
-        console.log("Friend added successfully");
         setFriendUsername("");
         setFriendAdded(true);
         setAddTrigger(!addTrigger);
@@ -966,11 +991,6 @@ const FriendsPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error adding friend:", error);
-      alert(
-        error.message.includes("Failed to fetch")
-          ? "Backend API cannot be reached."
-          : "Error adding friend."
-      );
     }
   };
 
@@ -979,7 +999,7 @@ const FriendsPage = ({ user }) => {
       const response = await fetch(`${API_BASE_URL}/getRecentFriendMovies`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(friend), // Send friend's username
+        body: JSON.stringify(friend),
       });
 
       if (response.ok) {
@@ -990,11 +1010,6 @@ const FriendsPage = ({ user }) => {
       }
     } catch (error) {
       console.error("Error fetching friend activity:", error);
-      alert(
-        error.message.includes("Failed to fetch")
-          ? "Backend API cannot be reached."
-          : "Error fetching friend activity."
-      );
     }
   };
 
@@ -1003,11 +1018,30 @@ const FriendsPage = ({ user }) => {
     fetchFriendActivity(friend);
   };
 
-  useEffect(() => {
-    if (user && user !== "guest") {
-      fetchFriends();
+  const handleSelectMovie = async (movieTitle) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/get_imdb_id`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ movie_name: movieTitle }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const imdbId = data.imdb_id;
+
+        if (imdbId) {
+          window.open(`https://www.imdb.com/title/${imdbId}/`, "_blank");
+        } else {
+          console.error("IMDb ID not found for:", movieTitle);
+        }
+      } else {
+        console.error("Failed to fetch IMDb ID for:", movieTitle);
+      }
+    } catch (error) {
+      console.error("Error fetching IMDb ID:", error);
     }
-  }, [user, addTrigger]);
+  };
 
   if (!user || user === "guest") {
     return <div>Please log in to use the friends feature.</div>;
@@ -1016,10 +1050,7 @@ const FriendsPage = ({ user }) => {
   return (
     <div>
       {friendAdded && (
-        <div
-          className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-          role="alert"
-        >
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
           <strong className="font-bold">Success!</strong>
           <span className="block sm:inline"> Friend added successfully.</span>
         </div>
@@ -1067,12 +1098,12 @@ const FriendsPage = ({ user }) => {
                 <div key={index} className="mb-2">
                   <Card>
                     <CardHeader>
-                      <a
-                        href={`/movie/${activity.imdb_id}`}
-                        className="text-blue-500 hover:underline"
+                      <span
+                        className="text-blue-500 hover:underline cursor-pointer"
+                        onClick={() => handleSelectMovie(activity.name)}
                       >
                         {activity.name}
-                      </a>
+                      </span>
                     </CardHeader>
                     <CardContent>
                       <p>{activity.description}</p>
