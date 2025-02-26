@@ -23,9 +23,6 @@ Prevous version: https://github.com/CSC510-Group13/BingeSuggest
 
 
 https://drive.google.com/file/d/1-dDDALwgS7VVANqMezGMK5_OEquLFFK5/view?usp=sharing
-https://github.com/user-attachments/assets/7e24871a-9afb-4ef0-904c-d05a0ca8791c
-
-
 
 ## Features
 
