@@ -319,7 +319,7 @@ const RecommendationsPage = ({ user }) => {
 
   const fetchRecommendations = async () => {
     if (!userMovies.trim()) {
-      setRecommendations([]); // Clear recommendations if input is empty
+      setRecommendations([]);
       return;
     }
 
@@ -333,7 +333,6 @@ const RecommendationsPage = ({ user }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         setRecommendations(
           data.recommendations.map((rec, index) => ({
             title: rec,
@@ -355,6 +354,32 @@ const RecommendationsPage = ({ user }) => {
       setRecommendations([]);
     }
   };
+
+  const handleSelectMovie = async (movieTitle) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/get_imdb_id`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ movie_name: movieTitle }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const imdbId = data.imdb_id;
+
+        if (imdbId) {
+          window.open(`https://www.imdb.com/title/${imdbId}/`, "_blank");
+        } else {
+          console.error("IMDb ID not found for:", movieTitle);
+        }
+      } else {
+        console.error("Failed to fetch IMDb ID for:", movieTitle);
+      }
+    } catch (error) {
+      console.error("Error fetching IMDb ID:", error);
+    }
+  };
+
   return (
     <div>
       <div className="mb-4">
@@ -385,16 +410,15 @@ const RecommendationsPage = ({ user }) => {
         </select>
       </div>
       <Button onClick={fetchRecommendations}>Get Recommendations</Button>
-
       <ul className="mt-4">
         {recommendations.map((movie, index) => (
           <li key={index} className="mb-2">
-            <a
-              href={`/movie/${movie.imdb_id}`}
-              className="text-blue-500 hover:underline"
+            <span
+              className="text-blue-500 hover:underline cursor-pointer"
+              onClick={() => handleSelectMovie(movie.title)}
             >
               {movie.title}
-            </a>
+            </span>
           </li>
         ))}
       </ul>
