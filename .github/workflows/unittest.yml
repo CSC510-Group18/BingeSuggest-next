@@ -2,10 +2,11 @@ name: Unittest
 
 on:
   push:
-    branches: [ main ]
+    # branches: [ master ]
+  workflow_dispatch: 
 
-  schedule:
-    - cron: "00 23 * * *"
+#   schedule:
+#     - cron: "00 23 * * *"
 
 jobs:
   build:
