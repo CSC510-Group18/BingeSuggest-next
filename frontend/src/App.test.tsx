@@ -456,3 +456,211 @@ describe("App Component", () => {
     expect(commentInput).toBeDisabled();
   });
 });
+
+
+describe("FriendsPage Component", () => {
+  beforeEach(() => {
+    fetch.mockClear();
+  });
+
+  test("renders the component", () => {
+    render(<FriendsPage user={mockUser} />);
+    expect(screen.getByText("Add Friend")).toBeInTheDocument();
+    expect(screen.getByText("Friends List")).toBeInTheDocument();
+    expect(screen.getByText("Friend Activity")).toBeInTheDocument();
+  });
+
+test("shows login message for guests", () => {
+    render(<FriendsPage user="guest" />);
+    expect(screen.getByText("Please log in to use the friends feature.")).toBeInTheDocument();
+  });
+
+test("fetches and displays friends", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockFriends,
+    });
+
+    render(<FriendsPage user={mockUser} />);
+
+    await waitFor(() => expect(screen.getByText("friend1")).toBeInTheDocument());
+    expect(screen.getByText("friend2")).toBeInTheDocument();
+  });
+
+test("handles fetch friends API failure", async () => {
+    fetch.mockRejectedValueOnce(new Error("Failed to fetch"));
+
+    render(<FriendsPage user={mockUser} />);
+
+    await waitFor(() => expect(window.alert).toHaveBeenCalledWith("Backend API cannot be reached."));
+  });
+
+test("adds a friend successfully", async () => {
+    fetch
+      .mockResolvedValueOnce({ ok: true }) // Add Friend API
+      .mockResolvedValueOnce({ ok: true, json: async () => mockFriends }); // Fetch Friends API after adding
+
+    render(<FriendsPage user={mockUser} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Enter friend's username"), {
+      target: { value: "newFriend" },
+    });
+
+    fireEvent.click(screen.getByText("Add Friend"));
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    expect(screen.getByText("friend1")).toBeInTheDocument();
+    expect(screen.getByText("friend2")).toBeInTheDocument();
+  });
+
+test("handles add friend API error", async () => {
+    fetch.mockRejectedValueOnce(new Error("Failed to fetch"));
+
+    render(<FriendsPage user={mockUser} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Enter friend's username"), {
+      target: { value: "newFriend" },
+    });
+
+    fireEvent.click(screen.getByText("Add Friend"));
+
+    await waitFor(() => expect(window.alert).toHaveBeenCalledWith("Backend API cannot be reached."));
+  });
+
+test("fetches and displays friend activity", async () => {
+    fetch
+      .mockResolvedValueOnce({ ok: true, json: async () => mockFriends }) // Fetch Friends
+      .mockResolvedValueOnce({ ok: true, json: async () => mockActivity }); // Fetch Friend Activity
+
+    render(<FriendsPage user={mockUser} />);
+
+    await waitFor(() => expect(screen.getByText("friend1")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText("friend1"));
+
+    await waitFor(() => expect(screen.getByText("Test Movie")).toBeInTheDocument());
+  });
+
+test("handles fetch friend activity API failure", async () => {
+    fetch.mockRejectedValueOnce(new Error("Failed to fetch"));
+
+    render(<FriendsPage user={mockUser} />);
+
+    await waitFor(() => expect(screen.getByText("friend1")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText("friend1"));
+
+    await waitFor(() => expect(window.alert).toHaveBeenCalledWith("Backend API cannot be reached."));
+  });
+});
+
+const mockMovies = ["Inception", "Interstellar", "The Dark Knight"];
+
+describe("MovieSearchDropdown Component", () => {
+  beforeEach(() => {
+    fetch.mockClear();
+  });
+
+  test("renders input field with placeholder", () => {
+    render(<MovieSearchDropdown placeholder="Search movies..." onSelect={jest.fn()} />);
+    expect(screen.getByPlaceholderText("Search movies...")).toBeInTheDocument();
+  });
+
+test("does not search when input has less than 3 characters", async () => {
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, { target: { value: "In" } });
+
+    await waitFor(() => expect(fetch).not.toHaveBeenCalled());
+  });
+
+  test("calls API when input length is 3 or more characters", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMovies,
+    });
+
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, { target: { value: "Inc" } });
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith(
+      "http://127.0.0.1:5000/search",
+      expect.objectContaining({
+        method: "POST",
+      })
+    ));
+  });
+
+  test("displays results when API returns data", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMovies,
+    });
+
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Inc" } });
+
+    await waitFor(() => expect(screen.getByText("Inception")).toBeInTheDocument());
+    expect(screen.getByText("Interstellar")).toBeInTheDocument();
+    expect(screen.getByText("The Dark Knight")).toBeInTheDocument();
+  });
+  
+test("hides dropdown when API returns empty list", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [],
+    });
+
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "xyz" } });
+
+    await waitFor(() => expect(screen.queryByRole("list")).not.toBeInTheDocument());
+  });
+ test("handles API errors gracefully", async () => {
+    fetch.mockRejectedValueOnce(new Error("API Error"));
+
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Inc" } });
+
+    await waitFor(() => expect(screen.queryByRole("list")).not.toBeInTheDocument());
+  });
+
+test("selecting a movie updates input and calls onSelect", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMovies,
+    });
+
+    const onSelectMock = jest.fn();
+    render(<MovieSearchDropdown onSelect={onSelectMock} />);
+
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Inc" } });
+
+    await waitFor(() => expect(screen.getByText("Inception")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText("Inception"));
+
+    expect(onSelectMock).toHaveBeenCalledWith("Inception");
+    expect(screen.getByRole("textbox")).toHaveValue("Inception");
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+  });
+  
+test("closes dropdown when clicking outside", async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockMovies,
+    });
+
+    render(<MovieSearchDropdown onSelect={jest.fn()} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Inc" } });
+
+    await waitFor(() => expect(screen.getByText("Inception")).toBeInTheDocument());
+
+    fireEvent.mouseDown(document.body);
+
+    await waitFor(() => expect(screen.queryByRole("list")).not.toBeInTheDocument());
+  });
+});
