@@ -22,11 +22,13 @@ Prevous version: https://github.com/CSC510-Group13/BingeSuggest
 ## Demo
 
 
-<iframe src="https://drive.google.com/file/d/1-dDDALwgS7VVANqMezGMK5_OEquLFFK5/preview" width="640" height="480" allow="autoplay"></iframe>
+<!-- <iframe src="https://drive.google.com/file/d/1-dDDALwgS7VVANqMezGMK5_OEquLFFK5/preview" width="640" height="480" allow="autoplay"></iframe> -->
 
 We also compared this version to prevous version of BingeSuggest. The new version is a complete rewrite using modern technologies and practices, resulting in a more efficient and user-friendly application.
 
-View it on Google Drive: https://drive.google.com/file/d/1-dDDALwgS7VVANqMezGMK5_OEquLFFK5/view?usp=sharing
+[![](https://cdn.discordapp.com/attachments/1332562207741055056/1344138393403133994/CleanShot-2025-02-25-21.45.59.png?ex=67bfd1ed&is=67be806d&hm=33944122ee61a337020f84dd6f57201c93379c1ffb491a6f0a919e2089f620d5&)](https://drive.google.com/file/d/1-dDDALwgS7VVANqMezGMK5_OEquLFFK5/view?usp=sharing)
+
+Click on the image to view the demo video. The video showcases the new features and improvements in BingeSuggest-next, including the new UI, performance enhancements, and additional functionalities.
 
 ## Features
 
