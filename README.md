@@ -15,7 +15,7 @@ Prevous version: https://github.com/CSC510-Group13/BingeSuggest
     - [Building](#building)
     - [Deploying](#deploying)
     - [Web App Dir Structure](#web-app-dir-structure)
-  - [Credits](#credits)
+  - [Cite this Project](#cite-this-project)
   - [License](#license)
 
 
@@ -100,9 +100,17 @@ This command creates a gist (with modifications) for easy sharing and deployment
 - **src/components/MovieSearchDropdown.tsx:** A reusable movie search dropdown component that uses real-time search via API.
 - **Makefile:** Provides commands for building and deploying (refer to the Makefile for more details).
 
-## Credits
+## Cite this Project
 
-The web app is a complete rewrite by Teddy (tddschn), modernizing the original 1990-style jQuery/Flask version into a robust React-based application.
+```bibtex
+@software{BingeSuggest-next,
+  author = {Ryan Mikula and Teddy Chen and Mulikatu Yakubu},
+  title = {BingeSuggest-next},
+  year = {2025},
+  url = {https://github.com/CSC510-Group13/BingeSuggest},
+  note = {A modern movie suggestion and review web application.}
+}
+```
 
 ## License
 
