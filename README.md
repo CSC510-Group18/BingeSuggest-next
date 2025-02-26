@@ -36,6 +36,7 @@ https://drive.google.com/file/d/1-dDDALwgS7VVANqMezGMK5_OEquLFFK5/view?usp=shari
 ## Improvements over the previous version
 
 - Performance: Converted code to now a Single Page Application (SPA), utilizing client-side navigation that allows users to navigate to different part of the app at the speed of light. A significant performance increase of over 1000x on some pages!
+- **Friends:** Users can now add friends and browser their watch history.
 - Recommendation: Users now have access to AI-powered movie recommendation assistance through our Recommendation Genie.
 - UI Enhancements: Frontend rewritten from scratch featuring a new modern UI design. Migrated from jQuery to React, Bun, TypeScript, Tailwind, and many other newer technologies. Intuitive interface and layout!
 - Dark Mode: Users now have access to a dark mode toggle at the top right.
