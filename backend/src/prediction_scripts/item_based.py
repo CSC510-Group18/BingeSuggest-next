@@ -17,7 +17,6 @@ def recommend_for_new_user(user_rating, gw, dw, aw):
     """
     Generates a list of recommended movie titles for a new user based on their ratings.
     """
-    # ratings = pd.read_csv(os.path.join(project_dir, "data", "ratings.csv"))
     movies = pd.read_csv(os.path.join(project_dir, "data", "movies.csv"))
     user = pd.DataFrame(user_rating)
     user_movie_id = movies[movies["title"].isin(user["title"])]

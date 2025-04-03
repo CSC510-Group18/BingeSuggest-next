@@ -3,10 +3,10 @@
 
 -- @author: bingesuggest-next
 
-CREATE DATABASE IF NOT EXISTS bingesuggest-nextDB;
+CREATE DATABASE IF NOT EXISTS `bingesuggest-nextDB`;
 
 -- Switch to the bingesuggest-nextDB database
-USE bingesuggest-nextDB;
+USE `bingesuggest-nextDB`;
 
 -- Create the Users table
 CREATE TABLE IF NOT EXISTS Users (
