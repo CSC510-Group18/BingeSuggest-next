@@ -11,7 +11,7 @@ This code is licensed under MIT license (see LICENSE for details)
 import json
 import sys
 import os
-from flask import Flask, jsonify, render_template, request, g
+from flask import Flask, jsonify, render_template, request, g, send_from_directory
 from flask_cors import CORS
 import mysql.connector
 import requests
@@ -205,9 +205,11 @@ def search():
     term = request.form["q"]
     finder = Search()
     filtered_dict = finder.results_top_ten(term)
-    resp = jsonify(filtered_dict)
+    out = [(t["title"], os.path.join("http://localhost:5000/thumbnails", f"{t['imdb_id']}.jpg")) for t in filtered_dict]
+    resp = jsonify(out)
     resp.status_code = 200
     return resp
+
 
 @app.route("/", methods=["POST"])
 def create_acc():
@@ -653,6 +655,20 @@ def after_request(response):
     Closes the db connection.
     """
     return response
+
+
+# Add a route to serve thumbnails
+@app.route("/thumbnails/<path:filename>")
+def serve_thumbnail(filename):
+    """
+    Serves thumbnail images from the thumbnails directory.
+    """
+    PATH = os.path.join(os.path.dirname(__file__), "thumbnails")
+    thumbnail_path = os.path.join(PATH, filename)
+    if os.path.exists(thumbnail_path):
+        return send_from_directory(PATH, filename)
+    else:
+        return jsonify({"error": "Thumbnail not found"}), 404
 
 
 if __name__ == "__main__":

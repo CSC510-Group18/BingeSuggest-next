@@ -188,11 +188,11 @@ const LoginPage = ({ setUser }) => {
 
 const SearchPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<[string, string?][]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const searchContainerRef = useRef(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleSearch = async (term) => {
+  const handleSearch = async (term: string) => {
     if (term.length < 3) {
       // Don't search for very short terms
       setSearchResults([]);
@@ -209,6 +209,7 @@ const SearchPage = () => {
 
       if (response.ok) {
         const data = await response.json();
+        // Expect data to be an array of arrays with [title, thumbnail_path]
         setSearchResults(data);
         setIsDropdownOpen(true);
       } else {
@@ -223,13 +224,13 @@ const SearchPage = () => {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     setSearchTerm(term);
     handleSearch(term);
   };
 
-const handleSelectMovie = async (movieTitle) => {
+const handleSelectMovie = async (movieTitle: string) => {
   console.log("Selected movie:", movieTitle); // Debugging
 
   try {
@@ -264,14 +265,11 @@ const handleSelectMovie = async (movieTitle) => {
   setIsDropdownOpen(false);
 };
 
-
-
-
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         searchContainerRef.current &&
-        !searchContainerRef.current.contains(event.target)
+        !searchContainerRef.current.contains(event.target as Node)
       ) {
         setIsDropdownOpen(false);
       }
@@ -294,17 +292,55 @@ const handleSelectMovie = async (movieTitle) => {
         autoComplete="off"
       />
       {isDropdownOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg">
+        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
           <ul>
-            {searchResults.map((movie, index) => (
-              <li
-                key={index}
-                className="p-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleSelectMovie(movie)}
-              >
-                {movie}
-              </li>
-            ))}
+            {searchResults.map((movie, index) => {
+              const title = movie[0];
+              const thumbnail = movie[1];
+              console.log("Thumbnail URL:", movie[1]);
+
+
+              return (
+                <li
+                  key={index}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
+                  onClick={() => handleSelectMovie(title)}
+                >
+                  {/* Movie icon placeholder when no thumbnail */}
+                  {!thumbnail ? (
+                    <div className="w-10 h-14 bg-gray-200 dark:bg-gray-600 flex items-center justify-center rounded mr-3 border border-gray-300 dark:border-gray-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h18M3 16h18" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <img 
+                      src={thumbnail} 
+                      alt={title}
+                      className="w-10 h-14 object-cover mr-3 rounded border border-gray-200 dark:border-gray-600"
+                      onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                        // Get the image element
+                        const imgElement = e.currentTarget;
+
+                        console.log("Thumbnail URL error:", thumbnail);
+                        
+                        // Create the placeholder
+                        const placeholder = document.createElement('div');
+                        placeholder.className = "w-10 h-14 bg-gray-200 dark:bg-gray-600 flex items-center justify-center rounded mr-3 border border-gray-300 dark:border-gray-500";
+                        placeholder.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h18M3 16h18" /></svg>`;
+                        
+                        // Replace the img with the placeholder
+                        if (imgElement.parentNode) {
+                          imgElement.parentNode.insertBefore(placeholder, imgElement);
+                          imgElement.parentNode.removeChild(imgElement);
+                        }
+                      }}
+                    />
+                  )}
+                  <span className="dark:text-white">{title}</span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
@@ -312,10 +348,17 @@ const handleSelectMovie = async (movieTitle) => {
   );
 };
 
-const RecommendationsPage = ({ user }) => {
+const RecommendationsPage = ({ user }: { user: string | null }) => {
   const [recommendationType, setRecommendationType] = useState("all");
   const [userMovies, setUserMovies] = useState("");
-  const [recommendations, setRecommendations] = useState([]);
+  
+  interface Recommendation {
+    title: string;
+    genre: string;
+    imdb_id: string;
+  }
+  
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
   const fetchRecommendations = async () => {
     if (!userMovies.trim()) {
@@ -334,7 +377,7 @@ const RecommendationsPage = ({ user }) => {
       if (response.ok) {
         const data = await response.json();
         setRecommendations(
-          data.recommendations.map((rec, index) => ({
+          data.recommendations.map((rec: string, index: number) => ({
             title: rec,
             genre: data.genres[index],
             imdb_id: data.imdb_id[index],
@@ -344,18 +387,22 @@ const RecommendationsPage = ({ user }) => {
         console.error("Failed to fetch recommendations");
         setRecommendations([]);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching recommendations:", error);
-      alert(
-        error.message.includes("Failed to fetch")
-          ? "Backend API cannot be reached."
-          : "Error fetching recommendations."
-      );
+      if (error instanceof Error) {
+        alert(
+          error.message.includes("Failed to fetch")
+            ? "Backend API cannot be reached."
+            : "Error fetching recommendations."
+        );
+      } else {
+        alert("Unknown error fetching recommendations.");
+      }
       setRecommendations([]);
     }
   };
 
-  const handleSelectMovie = async (movieTitle) => {
+  const handleSelectMovie = async (movieTitle: string) => {
     try {
       const response = await fetch(`${API_BASE_URL}/get_imdb_id`, {
         method: "POST",

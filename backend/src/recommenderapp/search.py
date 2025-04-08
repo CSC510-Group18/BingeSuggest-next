@@ -32,9 +32,10 @@ class Search:
         """
         n = len(word)
         res = []
+        print(word)
         word = word.lower()
-        for x in self.df["title"]:
-            curr = x.lower()
+        for _, x in self.df[["title", "imdb_id"]].iterrows():
+            curr = x["title"].lower()
             if curr[:n] == word:
                 res.append(x)
         return res
@@ -45,9 +46,9 @@ class Search:
         """
         res = []
         word = word.lower()
-        for x in self.df["title"]:
-            if x not in visited_words:
-                curr = x.lower()
+        for _, x in self.df[["title", "imdb_id"]].iterrows():
+            if x["title"] not in visited_words:
+                curr = x["title"].lower()
                 if word in curr:
                     res.append(x)
         return res
@@ -59,7 +60,7 @@ class Search:
         starts_with = self.starts_with(word)
         visited_words = set()
         for x in starts_with:
-            visited_words.add(x)
+            visited_words.add(x["title"])
         anywhere = self.anywhere(word, visited_words)
         starts_with.extend(anywhere)
         return starts_with

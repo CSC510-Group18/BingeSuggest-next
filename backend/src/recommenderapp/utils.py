@@ -141,11 +141,8 @@ def init_db(override=False):
     conn.close()
 
 def download_thumbnails():
-    """
-    Download thumbnails for all movies in the database
-    """
     print("Downloading thumbnails...")
-    PATH = "thumbnails"
+    PATH = os.path.join(os.path.dirname(__file__), "thumbnails")
     if(os.path.exists(PATH)):
         return
     os.makedirs(PATH, exist_ok=True)
@@ -159,13 +156,12 @@ def download_thumbnails():
     with zipfile.ZipFile("48k-imdb-movies-with-posters.zip", "r") as zip_ref:
         zip_ref.extractall(temppath)
 
-    # Move all jpg files to thumbnails folder and remove other files
     for root, dirs, files in os.walk(temppath):
         for file in files:
             if file.endswith('.jpg'):
-                # Get source and destination paths
                 src_path = os.path.join(root, file)
                 dst_path = os.path.join(PATH, file)
+                print(f"Moving {src_path} to {dst_path}")
                 shutil.move(src_path, dst_path)
     
     print("Thumbnails downloaded")
