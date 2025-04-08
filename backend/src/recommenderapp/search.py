@@ -69,7 +69,7 @@ class Search:
         """
         Function to get top 10 results
         """
-        return self.results(word)[:3] # good luck :o
+        return self.results(word)[:10] # good luck :o
 
 
 # if __name__ == "__main__":
