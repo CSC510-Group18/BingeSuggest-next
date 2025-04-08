@@ -1,13 +1,4 @@
-"""
-Copyright (c) 2023 Nathan Kohen, Nicholas Foster, Brandon Walia, Robert Kenney
-This code is licensed under MIT license (see LICENSE for details)
-
-@author: bingesuggest-next
-"""
-
-# pylint: disable=wrong-import-position
-# pylint: disable=wrong-import-order
-# pylint: disable=import-error
+#!/usr/bin/env python3
 import datetime
 import logging
 import smtplib
@@ -20,7 +11,131 @@ import json
 
 import pandas as pd
 import os
+import sqlite3
 
+def init_db(override=False):
+    """
+    Initialize the database
+    """
+
+    DB_NAME = 'movies.db'
+
+    # Only initialize if database doesn't exist
+    if os.path.exists(DB_NAME) and not override:
+        return
+    
+    # Create new database
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    # Create Users table
+    cursor.execute('''
+    CREATE TABLE Users (
+        idUsers INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL
+    )
+    ''')
+    
+    # Create Movies table
+    cursor.execute('''
+    CREATE TABLE Movies (
+        idMovies INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        imdb_id TEXT UNIQUE NOT NULL
+    )
+    ''')
+    
+    # Create Ratings table
+    cursor.execute('''
+    CREATE TABLE Ratings (
+        idRatings INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        movie_id INTEGER NOT NULL,
+        score INTEGER NOT NULL,
+        review TEXT,
+        time DATETIME NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES Users (idUsers),
+        FOREIGN KEY (movie_id) REFERENCES Movies (idMovies)
+    )
+    ''')
+    
+    # Create Friends table
+    cursor.execute('''
+    CREATE TABLE Friends (
+        idFriendship INTEGER PRIMARY KEY AUTOINCREMENT,
+        idUsers INTEGER NOT NULL,
+        idFriend INTEGER NOT NULL,
+        FOREIGN KEY (idUsers) REFERENCES Users (idUsers),
+        FOREIGN KEY (idFriend) REFERENCES Users (idUsers)
+    )
+    ''')
+    
+    # Create Watchlist table
+    cursor.execute('''
+    CREATE TABLE Watchlist (
+        idWatchlist INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        movie_id INTEGER NOT NULL,
+        time DATETIME NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES Users (idUsers),
+        FOREIGN KEY (movie_id) REFERENCES Movies (idMovies)
+    )
+    ''')
+    
+    # Create WatchedHistory table
+    cursor.execute('''
+    CREATE TABLE WatchedHistory (
+        idWatchedHistory INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        movie_id INTEGER NOT NULL,
+        watched_date DATETIME NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES Users (idUsers),
+        FOREIGN KEY (movie_id) REFERENCES Movies (idMovies)
+    )
+    ''')
+    
+    # Create Discussion table
+    cursor.execute('''
+    CREATE TABLE Discussion (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        imdb_id TEXT NOT NULL,
+        comments TEXT
+    )
+    ''')
+
+    # Add sample movies
+    def extract_values(line):
+        line = line.strip().split("VALUES")[1].strip().strip('();\n').split(',')
+        movie_id = int(line[0])
+        name = line[1].strip().strip("'")
+        imdb_id = line[2].strip().strip("'")
+        return (movie_id, name, imdb_id)
+
+    with open(os.path.join(os.path.dirname(__file__), 'movies.sql'), 'r') as sql_file:
+        sample_movies = []
+        seen_imdb_ids = set()
+        for line in sql_file:
+            if line.strip() and not line.startswith('--') and line.startswith('INSERT'):
+                try:
+                    movie_data = extract_values(line)
+                    if movie_data[2] not in seen_imdb_ids:  # Check for duplicate IMDB IDs
+                        sample_movies.append(movie_data)
+                        seen_imdb_ids.add(movie_data[2])
+                except Exception as e:
+                    logging.warning(f"Failed to process line: {line}. Error: {str(e)}")
+                    continue
+    
+    if sample_movies:
+        cursor.executemany(
+            "INSERT INTO Movies (idMovies, name, imdb_id) VALUES (?, ?, ?)",
+            sample_movies
+        )
+
+    # Commit changes and close connection
+    conn.commit()
+    conn.close()
 
 def create_colored_tags(genres):
     """
@@ -199,11 +314,11 @@ def create_account(db, email, username, password):
     """
     Utility function for creating an account
     """
-    executor = db.cursor()
+    cursor = db.cursor()
     new_pass = password.encode("utf-8")
-    h = bcrypt.hashpw(new_pass, bcrypt.gensalt())
-    executor.execute(
-        "INSERT INTO Users(username, email, password) VALUES (%s, %s, %s);",
+    h = new_pass
+    cursor.execute(
+        "INSERT INTO Users(username, email, password) VALUES (?, ?, ?);",
         (username, email, h),
     )
     db.commit()
@@ -213,15 +328,15 @@ def add_friend(db, username, user_id):
     """
     Utility function for adding a friend
     """
-    executor = db.cursor()
-    executor.execute("SELECT idUsers FROM Users WHERE username = %s;", [username])
-    friend_id = executor.fetchall()[0][0]
-    executor.execute(
-        "INSERT INTO Friends(idUsers, idFriend) VALUES (%s, %s);",
+    cursor = db.cursor()
+    cursor.execute("SELECT idUsers FROM Users WHERE username = ?;", [username])
+    friend_id = cursor.fetchone()[0]
+    cursor.execute(
+        "INSERT INTO Friends(idUsers, idFriend) VALUES (?, ?);",
         (int(user_id), int(friend_id)),
     )
-    executor.execute(
-        "INSERT INTO Friends(idUsers, idFriend) VALUES (%s, %s);",
+    cursor.execute(
+        "INSERT INTO Friends(idUsers, idFriend) VALUES (?, ?);",
         (int(friend_id), int(user_id)),
     )
     db.commit()
@@ -233,13 +348,13 @@ def login_to_account(db, username, password):
     """
     executor = db.cursor()
     executor.execute(
-        "SELECT IdUsers, username, password FROM Users WHERE username = %s;",
+        "SELECT IdUsers, username, password FROM Users WHERE username = ?;",
         [username],
     )
     result = executor.fetchall()
-    new_pass = password.encode("utf-8")
-    actual_pass = (result[0][2]).encode("utf-8")
-    if len(result) == 0 or not bcrypt.checkpw(new_pass, actual_pass):
+    encoded_pass = password.encode("utf-8")
+    actual_pass = (result[0][2])
+    if len(result) == 0 or encoded_pass != actual_pass:
         return None
     return result[0][0]
 
@@ -248,14 +363,13 @@ def submit_review(db, user, movie, score, review):
     """
     Utility function for creating a dictionary for submitting a review
     """
-    executor = db.cursor()
-    executor.execute("SELECT idMovies FROM Movies WHERE name = %s", [movie])
-    movie_id = executor.fetchall()[0][0]
-    d = datetime.datetime.utcnow()
-    timestamp = d.strftime("%Y-%m-%d %H:%M:%S")
-    executor.execute(
+    cursor = db.cursor()
+    cursor.execute("SELECT idMovies FROM Movies WHERE name = ?", [movie])
+    movie_id = cursor.fetchone()[0]
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute(
         "INSERT INTO Ratings(user_id, movie_id, score, review, time) \
-                        VALUES (%s, %s, %s, %s, %s);",
+        VALUES (?, ?, ?, ?, ?);",
         (int(user), int(movie_id), int(score), str(review), timestamp),
     )
     db.commit()
@@ -265,15 +379,15 @@ def get_wall_posts(db):
     """
     Utility function for creating getting wall posts from the db
     """
-    executor = db.cursor()
-    executor.execute(
+    cursor = db.cursor()
+    cursor.execute(
         "SELECT name, imdb_id, review, score, username, time FROM Users JOIN \
-                     (SELECT name, imdb_id, review, score, user_id, time FROM Ratings\
-                          JOIN Movies on Ratings.movie_id = Movies.idMovies) AS moviereview \
-                            ON Users.idUsers = moviereview.user_id ORDER BY time limit 50"
+        (SELECT name, imdb_id, review, score, user_id, time FROM Ratings\
+        JOIN Movies on Ratings.movie_id = Movies.idMovies) AS moviereview \
+        ON Users.idUsers = moviereview.user_id ORDER BY time limit 50"
     )
-    rows = [x[0] for x in executor.description]
-    result = executor.fetchall()
+    rows = [x[0] for x in cursor.description]
+    result = cursor.fetchall()
     json_data = []
     for r in result:
         json_data.append(dict(zip(rows, r)))
@@ -288,7 +402,7 @@ def get_recent_movies(db, user):
     executor.execute(
         "SELECT name, score FROM Ratings AS r JOIN \
     Movies AS m ON m.idMovies = r.movie_id \
-    WHERE user_id = %s \
+    WHERE user_id = ? \
     ORDER BY time DESC \
     LIMIT 5;",
         [int(user)],
@@ -306,7 +420,7 @@ def get_username(db, user):
     Utility function for getting the current users username
     """
     executor = db.cursor()
-    executor.execute("SELECT username FROM Users WHERE idUsers = %s;", [int(user)])
+    executor.execute("SELECT username FROM Users WHERE idUsers = ?;", [int(user)])
     result = executor.fetchall()
     return jsonify(result[0][0])
 
@@ -316,7 +430,7 @@ def get_username_data(db, user):
     Utility function for getting the current users username
     """
     executor = db.cursor()
-    executor.execute("SELECT username FROM Users WHERE idUsers = %s;", [int(user)])
+    executor.execute("SELECT username FROM Users WHERE idUsers = ?;", [int(user)])
     result = executor.fetchall()
     return result[0][0]
 
@@ -326,13 +440,13 @@ def get_recent_friend_movies(db, user):
     Utility function for getting a certain friends recent movies
     """
     executor = db.cursor()
-    executor.execute("SELECT idUsers FROM Users WHERE username = %s;", [str(user)])
+    executor.execute("SELECT idUsers FROM Users WHERE username = ?;", [str(user)])
     result = executor.fetchall()
     user_id = result[0][0]
     executor.execute(
         "SELECT name, score FROM Ratings AS r JOIN \
     Movies AS m ON m.idMovies = r.movie_id \
-    WHERE user_id = %s \
+    WHERE user_id = ? \
     ORDER BY time DESC \
     LIMIT 5;",
         [int(user_id)],
@@ -352,7 +466,7 @@ def get_friends(db, user):
     executor = db.cursor()
     executor.execute(
         "SELECT username FROM Users AS u \
-                     JOIN Friends AS f ON u.idUsers = f.idFriend WHERE f.idUsers = %s;",
+                     JOIN Friends AS f ON u.idUsers = f.idFriend WHERE f.idUsers = ?;",
         [int(user)],
     )
     result = executor.fetchall()
@@ -368,7 +482,7 @@ def add_to_watchlist(db, user_id, movie_id, timestamp=None):
 
     # Check if the movie is already in the user's watchlist
     cursor.execute(
-        "SELECT 1 FROM Watchlist WHERE user_id = %s AND movie_id = %s",
+        "SELECT 1 FROM Watchlist WHERE user_id = ? AND movie_id = ?",
         (int(user_id), int(movie_id)),
     )
     existing_entry = cursor.fetchone()
@@ -376,15 +490,15 @@ def add_to_watchlist(db, user_id, movie_id, timestamp=None):
     # If the movie is not already in the watchlist, add it
     if not existing_entry:
         if timestamp is None:
-            timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cursor.execute(
-            "INSERT INTO Watchlist (user_id, movie_id, time) VALUES (%s, %s, %s);",
+            "INSERT INTO Watchlist (user_id, movie_id, time) VALUES (?, ?, ?);",
             (int(user_id), int(movie_id), timestamp),
         )
         db.commit()
         return True  # Indicate that the movie was added
     else:
-        return False  # Indicate that the movie was already in the watchlist
+        return False  # Indicate that the movie was already in the watchlist
 
 
 def get_imdb_id_by_name(db, movie_name):
@@ -392,7 +506,7 @@ def get_imdb_id_by_name(db, movie_name):
     Fetches the imdb_id for a movie based on its name.
     """
     cursor = db.cursor()
-    cursor.execute("SELECT imdb_id FROM Movies WHERE name = %s LIMIT 1", (movie_name,))
+    cursor.execute("SELECT imdb_id FROM Movies WHERE name = ? LIMIT 1", (movie_name,))
     result = cursor.fetchone()
     return result[0] if result else None
 
@@ -404,7 +518,7 @@ def add_to_watched_history(db, user_id, imdb_id, watched_date=None):
     cursor = db.cursor()
 
     # Check if the movie exists in the database
-    cursor.execute("SELECT idMovies FROM Movies WHERE imdb_id = %s", [imdb_id])
+    cursor.execute("SELECT idMovies FROM Movies WHERE imdb_id = ?", [imdb_id])
     movie_result = cursor.fetchone()
     if not movie_result:
         return False, "Movie not found"
@@ -413,18 +527,16 @@ def add_to_watched_history(db, user_id, imdb_id, watched_date=None):
 
     # Check if the movie is already in the user's watched history
     cursor.execute(
-        "SELECT 1 FROM WatchedHistory WHERE user_id = %s AND movie_id = %s",
+        "SELECT 1 FROM WatchedHistory WHERE user_id = ? AND movie_id = ?",
         [user_id, movie_id],
     )
     if cursor.fetchone():
         return False, "Movie already in watched history"
 
     # Insert the movie into the user's watched history
-    watched_date = watched_date or datetime.datetime.utcnow().strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
+    watched_date = watched_date or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     cursor.execute(
-        "INSERT INTO WatchedHistory (user_id, movie_id, watched_date) VALUES (%s, %s, %s)",
+        "INSERT INTO WatchedHistory (user_id, movie_id, watched_date) VALUES (?, ?, ?)",
         [user_id, movie_id, watched_date],
     )
     db.commit()
@@ -438,7 +550,7 @@ def remove_from_watched_history_util(db, user_id, imdb_id):
     cursor = db.cursor()
 
     # Check if the movie exists in the database
-    cursor.execute("SELECT idMovies FROM Movies WHERE imdb_id = %s", [imdb_id])
+    cursor.execute("SELECT idMovies FROM Movies WHERE imdb_id = ?", [imdb_id])
     movie_result = cursor.fetchone()
     if not movie_result:
         return False, "Movie not found"
@@ -447,7 +559,7 @@ def remove_from_watched_history_util(db, user_id, imdb_id):
 
     # Check if the movie exists in the user's watched history
     cursor.execute(
-        "SELECT 1 FROM WatchedHistory WHERE user_id = %s AND movie_id = %s",
+        "SELECT 1 FROM WatchedHistory WHERE user_id = ? AND movie_id = ?",
         [user_id, movie_id],
     )
     if not cursor.fetchone():
@@ -455,7 +567,7 @@ def remove_from_watched_history_util(db, user_id, imdb_id):
 
     # Delete the movie from watched history
     cursor.execute(
-        "DELETE FROM WatchedHistory WHERE user_id = %s AND movie_id = %s",
+        "DELETE FROM WatchedHistory WHERE user_id = ? AND movie_id = ?",
         [user_id, movie_id],
     )
     db.commit()
@@ -471,7 +583,7 @@ def remove_from_watchlist(db, user_id, imdb_id):
     cursor.execute(
         """
         SELECT DISTINCT idMovies FROM Movies 
-        WHERE imdb_id = %s;
+        WHERE imdb_id = ?;
         """,
         [imdb_id],
     )
@@ -487,7 +599,7 @@ def remove_from_watchlist(db, user_id, imdb_id):
     # Delete the movie from watched history
     cursor.execute(
         """
-        DELETE FROM Watchlist WHERE movie_id = %s AND user_id = %s;
+        DELETE FROM Watchlist WHERE movie_id = ? AND user_id = ?;
         """,
         [idMovies, user_id],
     )
@@ -501,13 +613,13 @@ def create_or_update_discussion(db, data):
     """
     cursor = db.cursor()
     cursor.execute(
-        "SELECT * from Discussion where imdb_id = %s LIMIT 1", (data["imdb_id"],)
+        "SELECT * from Discussion where imdb_id = ? LIMIT 1", (data["imdb_id"],)
     )
     result = cursor.fetchone()
-    if result == None:
+    if result is None:
         comments = [{"user": data["user"], "comment": data["comment"]}]
         cursor.execute(
-            "Insert INTO Discussion (imdb_id, comments) values(%s,%s)",
+            "Insert INTO Discussion (imdb_id, comments) values(?,?)",
             (data["imdb_id"], json.dumps(comments)),
         )
         db.commit()
@@ -515,11 +627,8 @@ def create_or_update_discussion(db, data):
         comments = json.loads(result[2])
         comments.append({"user": data["user"], "comment": data["comment"]})
         cursor.execute(
-            "Update Discussion set comments = %s where imdb_id = %s",
-            (
-                json.dumps(comments),
-                data["imdb_id"],
-            ),
+            "Update Discussion set comments = ? where imdb_id = ?",
+            (json.dumps(comments), data["imdb_id"]),
         )
         db.commit()
     return (
@@ -537,6 +646,6 @@ def get_discussion(db, imdb_id):
     Get the discussion on the movie with imdb_id
     """
     cursor = db.cursor()
-    cursor.execute("SELECT comments from Discussion where imdb_id = %s", (imdb_id,))
+    cursor.execute("SELECT comments from Discussion where imdb_id = ?", (imdb_id,))
     result = cursor.fetchone()
     return (jsonify(json.loads(result[0])), 200)

@@ -16,6 +16,7 @@ from flask_cors import CORS
 import mysql.connector
 import requests
 from dotenv import load_dotenv
+import sqlite3
 import openai  # NEW: Import OpenAI
 
 sys.path.append("../../")
@@ -39,6 +40,7 @@ from src.recommenderapp.utils import (
     get_discussion,
     get_username_data,
     remove_from_watchlist,
+    init_db,
 )
 from src.recommenderapp.search import Search
 from datetime import datetime
@@ -203,9 +205,9 @@ def search():
     finder = Search()
     filtered_dict = finder.results_top_ten(term)
     resp = jsonify(filtered_dict)
+    print(filtered_dict)
     resp.status_code = 200
     return resp
-
 
 @app.route("/", methods=["POST"])
 def create_acc():
@@ -351,7 +353,7 @@ def add_movie_to_watchlist():
     print("imdb id is present")
 
     cursor = g.db.cursor()
-    cursor.execute("SELECT idMovies FROM Movies WHERE imdb_id = %s", [imdb_id])
+    cursor.execute("SELECT idMovies FROM Movies WHERE imdb_id = ?", [imdb_id])
     movie_id_result = cursor.fetchone()
     print("Selected movie.")
     if movie_id_result:
@@ -372,7 +374,7 @@ def add_movie_to_watchlist():
                 200,
             )
     else:
-        return jsonify({"status": "error", "message": "Movie not found"}), 404
+        return jsonify({"status": "error", "message": "Movie not found"}), 404
 
 
 @app.route("/watchlist", methods=["GET"])
@@ -391,13 +393,13 @@ def get_watchlist():
     Retrieves the current user's watchlist.
     """
     user_id = user[1]  # Assuming 'user' holds the currently logged-in user's ID
-    cursor = g.db.cursor(dictionary=True)
+    cursor = g.db.cursor(sqlite3.Row)
     cursor.execute(
         """
         SELECT m.name, m.imdb_id, w.time
         FROM Watchlist w
         JOIN Movies m ON w.movie_id = m.idMovies
-        WHERE w.user_id = %s
+        WHERE w.user_id = ?
         ORDER BY w.time DESC;
         """,
         [user_id],
@@ -484,13 +486,13 @@ def get_watched_history():
     Retrieves the current user's watched history.
     """
     user_id = user[1]  # Assuming 'user' holds the currently logged-in user's ID
-    cursor = g.db.cursor(dictionary=True)
+    cursor = g.db.cursor(sqlite3.Row)
     cursor.execute(
         """
         SELECT m.name AS movie_name, m.imdb_id, wh.watched_date
         FROM WatchedHistory wh
         JOIN Movies m ON wh.movie_id = m.idMovies
-        WHERE wh.user_id = %s
+        WHERE wh.user_id = ?
         ORDER BY wh.watched_date DESC;
         """,
         [user_id],
@@ -635,14 +637,13 @@ def before_request():
     """
     Opens the db connection.
     """
-    load_dotenv()
-    g.db = mysql.connector.connect(
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT", 27276),
-        database=os.getenv("DB_NAME"),
-    )
+
+    # initialize database
+    init_db()
+    
+    # Create a new connection for each request
+    g.db = sqlite3.connect('movies.db')
+    g.db.row_factory = sqlite3.Row  # This enables column access by name
 
 
 @app.after_request
@@ -650,7 +651,6 @@ def after_request(response):
     """
     Closes the db connection.
     """
-    g.db.close()
     return response
 
 
