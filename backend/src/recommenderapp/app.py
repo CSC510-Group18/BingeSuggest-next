@@ -205,7 +205,6 @@ def search():
     finder = Search()
     filtered_dict = finder.results_top_ten(term)
     resp = jsonify(filtered_dict)
-    print(filtered_dict)
     resp.status_code = 200
     return resp
 
