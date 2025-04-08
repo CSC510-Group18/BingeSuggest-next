@@ -1346,7 +1346,7 @@ const MoviePage = ({ user }) => {
 
 const RecommendationGenieTab: React.FC = () => {
   const [query, setQuery] = useState("");
-  const [recommendations, setRecommendations] = useState<string[]>([]);
+  const [recommendations, setRecommendations] = useState<[string, string][]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchAIRecommendations = async () => {
@@ -1393,10 +1393,21 @@ const RecommendationGenieTab: React.FC = () => {
       {recommendations.length > 0 && (
         <div className="mt-4">
           <h3 className="text-sm font-bold">✨ Magic Picks for You:</h3>
-          <ul className="mt-2">
+          <ul className="space-y-4">
             {recommendations.map((movie, index) => (
-              <li key={index} className="text-sm text-gray-700">
-                {movie}
+              <li key={index} className="flex items-center space-x-4">
+                <span className="text-sm font-medium">{index + 1}.</span>
+                <span className="flex-1">{movie[0]}</span>
+                <img 
+                  src={`http://localhost:5000/thumbnails/${movie[1].split('/').pop()}`}
+                  alt={`${movie[0]} poster`}
+                  className="w-16 h-24 object-cover rounded"
+                  onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                    console.log("Error loading image");
+                    // Use a placeholder image if loading fails
+                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGNsYXNzPSJoLTYgdy02IHRleHQtZ3JheS00MDAgZGFyazp0ZXh0LWdyYXktMzAwIiBmaWxsPSJub25lIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHN0cm9rZT0iY3VycmVudENvbG9yIj48cGF0aCBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMiIgZD0iTTcgNHYxNk0xNyA0djE2TTMgOGgxOE0zIDE2aDE4IiAvPjwvc3ZnPg==';
+                  }}
+                />
               </li>
             ))}
           </ul>

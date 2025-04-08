@@ -536,7 +536,7 @@ def get_imdb_id_by_name(db, movie_name):
     Fetches the imdb_id for a movie based on its name.
     """
     cursor = db.cursor()
-    cursor.execute("SELECT imdb_id FROM Movies WHERE name = ? LIMIT 1", (movie_name,))
+    cursor.execute("SELECT imdb_id FROM Movies WHERE name LIKE ? || '%' LIMIT 1", (movie_name,))
     result = cursor.fetchone()
     return result[0] if result else None
 

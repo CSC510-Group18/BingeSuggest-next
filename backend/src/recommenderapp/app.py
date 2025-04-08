@@ -616,18 +616,37 @@ def ai_recommendations():
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a movie recommendation AI."},
+                {"role": "system", "content": "You are a movie recommendation AI. Please provide recommendations in a JSON array format with just movie titles, the only key should be movies, I should be able to call json.loads(response.choices[0].message.content) and get a list of movies."},
                 {
-                    "role": "user",
-                    "content": f"Recommend 5 movies based on: {user_query}",
+                    "role": "user", 
+                    "content": f"Recommend 5 movies based on: {user_query}. Return just the movie titles in a JSON array."
                 },
             ],
         )
 
-        recommendations = response.choices[0].message.content.split("\n")
-        logging.debug(f"AI Recommendations: {recommendations}")
+        print(response.choices[0].message.content)
 
-        return jsonify({"recommendations": recommendations})
+        # Parse the JSON response
+        try:
+            movie_titles = json.loads(response.choices[0].message.content)["movies"]
+            recommendations = []
+            
+            # Look up each movie in database
+            for title in movie_titles:
+                print("Searching for: ", title)
+                imdb_id = get_imdb_id_by_name(g.db, title)
+                if imdb_id:
+                    recommendations.append(
+                        (title, "localhost:5000/thumbnails/" + imdb_id + ".jpg")
+                    )
+
+            logging.debug(f"AI Recommendations with thumbnails: {recommendations}")
+            print(recommendations)
+            return jsonify({"recommendations": recommendations})
+
+        except json.JSONDecodeError:
+            logging.error("Failed to parse AI response as JSON")
+            return jsonify({"error": "Invalid AI response format"}), 500
 
     except Exception as e:
         logging.error(f"Error in AI recommendations: {str(e)}", exc_info=True)
