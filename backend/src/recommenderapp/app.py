@@ -41,6 +41,7 @@ from src.recommenderapp.utils import (
     get_username_data,
     remove_from_watchlist,
     init_db,
+    download_thumbnails
 )
 from src.recommenderapp.search import Search
 from datetime import datetime
@@ -639,6 +640,7 @@ def before_request():
 
     # initialize database
     init_db()
+    download_thumbnails()
     
     # Create a new connection for each request
     g.db = sqlite3.connect('movies.db')

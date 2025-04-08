@@ -8,6 +8,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import jsonify
 import json
+import shutil
+import tempfile
+import zipfile
 
 import pandas as pd
 import os
@@ -136,6 +139,37 @@ def init_db(override=False):
     # Commit changes and close connection
     conn.commit()
     conn.close()
+
+def download_thumbnails():
+    """
+    Download thumbnails for all movies in the database
+    """
+    print("Downloading thumbnails...")
+    PATH = "thumbnails"
+    if(os.path.exists(PATH)):
+        return
+    os.makedirs(PATH, exist_ok=True)
+
+    import requests
+    zip_data = requests.get("https://www.kaggle.com/api/v1/datasets/download/rezaunderfit/48k-imdb-movies-with-posters")
+    with open("48k-imdb-movies-with-posters.zip", "wb") as f:
+        f.write(zip_data.content)
+
+    temppath = tempfile.mkdtemp()
+    with zipfile.ZipFile("48k-imdb-movies-with-posters.zip", "r") as zip_ref:
+        zip_ref.extractall(temppath)
+
+    # Move all jpg files to thumbnails folder and remove other files
+    for root, dirs, files in os.walk(temppath):
+        for file in files:
+            if file.endswith('.jpg'):
+                # Get source and destination paths
+                src_path = os.path.join(root, file)
+                dst_path = os.path.join(PATH, file)
+                shutil.move(src_path, dst_path)
+    
+    print("Thumbnails downloaded")
+    
 
 def create_colored_tags(genres):
     """
