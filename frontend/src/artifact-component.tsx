@@ -292,13 +292,12 @@ const handleSelectMovie = async (movieTitle: string) => {
         autoComplete="off"
       />
       {isDropdownOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
           <ul>
             {searchResults.map((movie, index) => {
               const title = movie[0];
               const thumbnail = movie[1];
               console.log("Thumbnail URL:", movie[1]);
-
 
               return (
                 <li
