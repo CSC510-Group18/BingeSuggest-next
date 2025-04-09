@@ -195,6 +195,45 @@ def send_email_to_user(recipient_email, categorized_data):
         server.quit()
 
 
+def send_email(email, body_html, subject):
+    # Email configuration
+    smtp_server = "smtp.gmail.com"
+    # Port for TLS
+    smtp_port = 587
+    sender_email = os.getenv("SENDER_EMAIL")
+
+    # Use an app password since 2-factor authentication is enabled
+    sender_password = os.getenv("SENDER_EMAIL_PASSWORD")
+
+    # Create the email message
+    message = MIMEMultipart("alternative")
+    message["From"] = sender_email
+    message["To"] = email
+    message["Subject"] = subject
+
+    # Attach the HTML email body
+    message.attach(MIMEText(body_html, "html"))
+
+    # Connect to the SMTP server
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        # Start TLS encryption
+        server.starttls()
+        server.login(sender_email, sender_password)
+
+        # Send the email
+        server.sendmail(sender_email, recipient_email, message.as_string())
+        logging.info("Email sent successfully!")
+
+    except SMTPException as e:
+        # Handle SMTP-related exceptions
+        logging.error("SMTP error while sending email: %s", str(e))
+
+    finally:
+        server.quit()
+
+
+
 def create_account(db, email, username, password):
     """
     Utility function for creating an account
