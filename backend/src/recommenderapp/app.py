@@ -14,17 +14,20 @@ import os
 from flask import Flask, jsonify, render_template, request, g
 from flask_cors import CORS
 import mysql.connector
-import requests
 from dotenv import load_dotenv
 import openai  # NEW: Import OpenAI
 import requests
 from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 sys.path.append("../../")
 from src.recommenderapp.utils import (
     beautify_feedback_data,
+    format_trakt_movies_to_html,
+    send_email,
     send_email_to_user,
     create_account,
     login_to_account,
@@ -66,7 +69,6 @@ comments: []
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")  # NEW: Set the OpenAI API key
 
-
 def get_recent_movies_from_trakt():
     """Fetch top 10 new movies from the past month using Trakt API"""
     try:
@@ -89,7 +91,6 @@ def get_recent_movies_from_trakt():
 
         return [{
             "title": movie['movie']["title"],
-            "year": movie['movie']["year"],
             "imdb_id": movie['movie']["ids"]["imdb"]
         } for movie in movies[:10]]
 
@@ -102,17 +103,10 @@ def send_weekly_recommendations():
     """Sends weekly recommendations to all users"""
     with app.app_context():
         try:
-            recent_movies = get_recent_movies_from_trakt()
+            recent_movies = format_trakt_movies_to_html(get_recent_movies_from_trakt())
             if not recent_movies:
                 app.logger.error("No movies found from Trakt API")
                 return
-
-            # Create email-friendly data structure
-            email_data = {
-                "Liked": [],
-                "Disliked": [],
-                "Yet to Watch": [movie["title"] for movie in recent_movies]
-            }
 
             # Get all users with emails
             db = mysql.connector.connect(
@@ -128,17 +122,24 @@ def send_weekly_recommendations():
             db.close()
 
             # Send emails to all users
-            for (email,) in users:
+            print('starting email sending')
+            for (email_address,) in users:
                 try:
-                    send_email_to_user(email, email_data)
-                    app.logger.info(f"Sent recommendations to {email}")
+                    email = MIMEMultipart("alternative")
+                    email["To"] = email_address
+                    email["Subject"] = "Newly Released Movies for You"
+                    email.attach(MIMEText(recent_movies, "html"))
+
+                    send_email(email, email_address)
+
+                    app.logger.info(f"Sent recommendations to {email_address}")
                 except Exception as e:
-                    app.logger.error(f"Error sending email to {email}: {str(e)}")
+                    app.logger.error(f"Error sending email to {email_address}: {str(e)}")
 
         except Exception as e:
             app.logger.error(f"Error in weekly recommendations: {str(e)}")
 
-print(get_recent_movies_from_trakt())
+
 # Run every Monday at 9 AM
 scheduler = BackgroundScheduler(daemon=True)
 scheduler.add_job(
@@ -147,7 +148,8 @@ scheduler.add_job(
         day_of_week="mon",
         hour=9,
         minute=0,
-        timezone="UTC"
+        timezone="UTC",
+        week="*/4"  # Send updates once a month
     ),
     name="Weekly Recommendations"
 )
