@@ -661,7 +661,6 @@ def before_request():
 
     # initialize database
     init_db()
-    download_thumbnails()
     
     # Create a new connection for each request
     g.db = sqlite3.connect('movies.db')
@@ -691,4 +690,7 @@ def serve_thumbnail(filename):
 
 
 if __name__ == "__main__":
+    print("Downloading thumbnails... (Roughly 600MB)")
+    download_thumbnails()
+    print("Starting server...")
     app.run(port=5000)

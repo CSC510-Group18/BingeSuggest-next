@@ -141,7 +141,6 @@ def init_db(override=False):
     conn.close()
 
 def download_thumbnails():
-    print("Downloading thumbnails...")
     PATH = os.path.join(os.path.dirname(__file__), "thumbnails")
     if(os.path.exists(PATH)):
         return
