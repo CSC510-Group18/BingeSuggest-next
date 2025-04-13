@@ -13,7 +13,6 @@ import sys
 import os
 from flask import Flask, jsonify, render_template, request, g, send_from_directory
 from flask_cors import CORS
-import mysql.connector
 import requests
 from dotenv import load_dotenv
 import sqlite3

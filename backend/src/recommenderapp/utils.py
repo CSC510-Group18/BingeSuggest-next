@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import datetime
+from datetime import datetime
 import logging
 import smtplib
 import bcrypt
@@ -344,11 +344,11 @@ def create_account(db, email, username, password):
     Utility function for creating an account
     """
     cursor = db.cursor()
-    new_pass = password.encode("utf-8")
-    h = new_pass
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
     cursor.execute(
         "INSERT INTO Users(username, email, password) VALUES (?, ?, ?);",
-        (username, email, h),
+        (username, email, hashed),
     )
     db.commit()
 
@@ -361,11 +361,11 @@ def add_friend(db, username, user_id):
     cursor.execute("SELECT idUsers FROM Users WHERE username = ?;", [username])
     friend_id = cursor.fetchone()[0]
     cursor.execute(
-        "INSERT INTO Friends(idUsers, idFriend) VALUES (?, ?);",
+        "INSERT INTO Friends(user_id, friend_id) VALUES (?, ?);",
         (int(user_id), int(friend_id)),
     )
     cursor.execute(
-        "INSERT INTO Friends(idUsers, idFriend) VALUES (?, ?);",
+        "INSERT INTO Friends(user_id, friend_id) VALUES (?, ?);",
         (int(friend_id), int(user_id)),
     )
     db.commit()
@@ -381,10 +381,15 @@ def login_to_account(db, username, password):
         [username],
     )
     result = executor.fetchall()
-    encoded_pass = password.encode("utf-8")
-    actual_pass = (result[0][2])
-    if len(result) == 0 or encoded_pass != actual_pass:
+    if len(result) == 0:
         return None
+    
+    encoded_pass = password.encode("utf-8")
+    stored_hash = result[0][2]
+    
+    if not bcrypt.checkpw(encoded_pass, stored_hash):
+        return None
+        
     return result[0][0]
 
 
@@ -495,7 +500,7 @@ def get_friends(db, user):
     executor = db.cursor()
     executor.execute(
         "SELECT username FROM Users AS u \
-                     JOIN Friends AS f ON u.idUsers = f.idFriend WHERE f.idUsers = ?;",
+                     JOIN Friends AS f ON u.idUsers = f.friend_id WHERE f.user_id = ?;",
         [int(user)],
     )
     result = executor.fetchall()
@@ -521,7 +526,7 @@ def add_to_watchlist(db, user_id, movie_id, timestamp=None):
         if timestamp is None:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cursor.execute(
-            "INSERT INTO Watchlist (user_id, movie_id, time) VALUES (?, ?, ?);",
+            "INSERT INTO Watchlist (user_id, movie_id, timestamp) VALUES (?, ?, ?);",
             (int(user_id), int(movie_id), timestamp),
         )
         db.commit()
@@ -607,33 +612,28 @@ def remove_from_watchlist(db, user_id, imdb_id):
     """
     Utility function to remove a movie from the user's watchlist.
     """
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor()
 
     cursor.execute(
         """
         SELECT DISTINCT idMovies FROM Movies 
         WHERE imdb_id = ?;
         """,
-        [imdb_id],
+        (imdb_id,),
     )
-
-    watchlist = cursor.fetchone()
-    idMovies = None
-    if watchlist is not None:
-        idMovies = watchlist["idMovies"]
-
-    if idMovies is None:
+    movie_id = cursor.fetchone()
+    if movie_id is None:
         return None, "Movie not in watchlist"
 
-    # Delete the movie from watched history
     cursor.execute(
         """
-        DELETE FROM Watchlist WHERE movie_id = ? AND user_id = ?;
+        DELETE FROM Watchlist 
+        WHERE user_id = ? AND movie_id = ?;
         """,
-        [idMovies, user_id],
+        (user_id, movie_id[0]),
     )
     db.commit()
-    return idMovies, "Movie removed from watchlist"
+    return movie_id[0], "Movie removed from watchlist"
 
 
 def create_or_update_discussion(db, data):
@@ -648,7 +648,7 @@ def create_or_update_discussion(db, data):
     if result is None:
         comments = [{"user": data["user"], "comment": data["comment"]}]
         cursor.execute(
-            "Insert INTO Discussion (imdb_id, comments) values(?,?)",
+            "INSERT INTO Discussion (imdb_id, comments) VALUES (?, ?)",
             (data["imdb_id"], json.dumps(comments)),
         )
         db.commit()
@@ -656,7 +656,7 @@ def create_or_update_discussion(db, data):
         comments = json.loads(result[2])
         comments.append({"user": data["user"], "comment": data["comment"]})
         cursor.execute(
-            "Update Discussion set comments = ? where imdb_id = ?",
+            "UPDATE Discussion SET comments = ? WHERE imdb_id = ?",
             (json.dumps(comments), data["imdb_id"]),
         )
         db.commit()

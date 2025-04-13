@@ -2,7 +2,7 @@ import sys
 import unittest
 import warnings
 from pathlib import Path
-import mysql.connector
+import sqlite3
 from dotenv import load_dotenv
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
@@ -24,14 +24,20 @@ class TestAddToWatchList(unittest.TestCase):
         """
         print("\nrunning setup method")
         load_dotenv()
-        self.db = mysql.connector.connect(
-            user="root", password="root", host="127.0.0.1"
-        )
-        self.executor = self.db.cursor()
-        self.executor.execute("USE testDB;")
-        self.executor.execute("SET FOREIGN_KEY_CHECKS=0;")
-        self.executor.execute("DELETE FROM Users;")
-        self.executor.execute("DELETE FROM Watchlist;")
+        self.db = sqlite3.connect(':memory:')
+        cursor = self.db.cursor()
+        cursor.execute("""CREATE TABLE IF NOT EXISTS Users (
+            idUsers INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )""")
+        cursor.execute("""CREATE TABLE IF NOT EXISTS Watchlist (
+            user_id INTEGER,
+            movie_id TEXT,
+            timestamp TEXT,
+            FOREIGN KEY(user_id) REFERENCES Users(idUsers)
+        )""")
         self.db.commit()
 
     def test_add_movie_success_different_movie(self):
@@ -39,8 +45,9 @@ class TestAddToWatchList(unittest.TestCase):
         Test adding a different movie successfully.
         """
         create_account(self.db, "user4@test.com", "user4", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         result = add_to_watchlist(self.db, user_id, "0266543")
         self.assertTrue(result)
 
@@ -49,8 +56,9 @@ class TestAddToWatchList(unittest.TestCase):
         Test adding a movie that already exists in watched history with a different movie.
         """
         create_account(self.db, "user5@test.com", "user5", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         add_to_watchlist(self.db, user_id, "0266543")
         result = add_to_watchlist(self.db, user_id, "0266543")
         self.assertFalse(result)
@@ -60,8 +68,9 @@ class TestAddToWatchList(unittest.TestCase):
         Test adding a movie that is not in the database with a different movie.
         """
         create_account(self.db, "user6@test.com", "user6", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         result = add_to_watchlist(self.db, user_id, "0000000", None)
         self.assertTrue(result)
 
@@ -70,8 +79,9 @@ class TestAddToWatchList(unittest.TestCase):
         Test adding multiple movies successfully.
         """
         create_account(self.db, "user7@test.com", "user7", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         movies = ["0109830", "0169547"]
         for movie in movies:
             result = add_to_watchlist(self.db, user_id, movie)
@@ -82,8 +92,9 @@ class TestAddToWatchList(unittest.TestCase):
         Test adding a movie with a provided timestamp.
         """
         create_account(self.db, "user8@test.com", "user8", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         result = add_to_watchlist(self.db, user_id, "0033467", "2024-11-23 12:00:00")
         self.assertTrue(result)
 
@@ -92,8 +103,9 @@ class TestAddToWatchList(unittest.TestCase):
         Test adding a movie without a timestamp.
         """
         create_account(self.db, "user9@test.com", "user9", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         result = add_to_watchlist(self.db, user_id, "0168629", None)
         self.assertTrue(result)
 
@@ -102,8 +114,9 @@ class TestAddToWatchList(unittest.TestCase):
         Test adding a movie to watchlist for the same user multiple times.
         """
         create_account(self.db, "user10@test.com", "user10", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         add_to_watchlist(self.db, user_id, "0168629", None)
         result = add_to_watchlist(self.db, user_id, "0168629", None)
         self.assertFalse(result)
@@ -120,8 +133,9 @@ class TestAddToWatchList(unittest.TestCase):
         Test trying to add a movie that doesn't exist in the database.
         """
         create_account(self.db, "user11@test.com", "user11", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         result = add_to_watchlist(self.db, user_id, "9999999", None)
         self.assertTrue(result)
 
@@ -130,8 +144,9 @@ class TestAddToWatchList(unittest.TestCase):
         Test adding multiple different movies to the watchlist for the same user.
         """
         create_account(self.db, "user12@test.com", "user12", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         movies = ["0109830", "0113101", "0094675"]
         for movie in movies:
             result = add_to_watchlist(self.db, user_id, movie, None)
