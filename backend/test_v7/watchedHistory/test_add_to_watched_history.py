@@ -2,7 +2,7 @@ import sys
 import unittest
 import warnings
 from pathlib import Path
-import mysql.connector
+import sqlite3
 from dotenv import load_dotenv
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
@@ -24,14 +24,36 @@ class TestAddToWatchedHistory(unittest.TestCase):
         """
         print("\nrunning setup method")
         load_dotenv()
-        self.db = mysql.connector.connect(
-            user="root", password="root", host="127.0.0.1"
-        )
-        self.executor = self.db.cursor()
-        self.executor.execute("USE testDB;")
-        self.executor.execute("SET FOREIGN_KEY_CHECKS=0;")
-        self.executor.execute("DELETE FROM Users;")
-        self.executor.execute("DELETE FROM WatchedHistory;")
+        self.db = sqlite3.connect(':memory:')
+        cursor = self.db.cursor()
+        cursor.execute("""CREATE TABLE IF NOT EXISTS Users (
+            idUsers INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )""")
+        cursor.execute("""CREATE TABLE IF NOT EXISTS WatchedHistory (
+            user_id INTEGER,
+            movie_id TEXT,
+            watched_date TEXT,
+            FOREIGN KEY(user_id) REFERENCES Users(idUsers)
+        )""")
+        cursor.execute("""CREATE TABLE IF NOT EXISTS Movies (
+            idMovies INTEGER PRIMARY KEY AUTOINCREMENT,
+            imdb_id TEXT UNIQUE NOT NULL,
+            title TEXT NOT NULL
+        )""")
+        # Insert test movie data
+        test_movies = [
+            ("tt0266543", "Finding Nemo"),
+            ("tt0109830", "Forrest Gump"),
+            ("tt0169547", "American Beauty"),
+            ("tt0033467", "Citizen Kane"),
+            ("tt0168629", "American Pie"),
+            ("tt0113101", "French Kiss"),
+            ("tt0094675", "The Naked Gun")
+        ]
+        cursor.executemany("INSERT OR IGNORE INTO Movies (imdb_id, title) VALUES (?, ?)", test_movies)
         self.db.commit()
 
     def test_add_movie_success_different_movie(self):
@@ -39,8 +61,9 @@ class TestAddToWatchedHistory(unittest.TestCase):
         Test adding a different movie successfully.
         """
         create_account(self.db, "user4@test.com", "user4", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         result = add_to_watched_history(self.db, user_id, "tt0266543", None)
         self.assertEqual(result, (True, "Movie added to watched history"))
 
@@ -49,8 +72,9 @@ class TestAddToWatchedHistory(unittest.TestCase):
         Test adding a movie that already exists in watched history with a different movie.
         """
         create_account(self.db, "user5@test.com", "user5", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         add_to_watched_history(self.db, user_id, "tt0266543", None)
         result = add_to_watched_history(self.db, user_id, "tt0266543", None)
         self.assertEqual(result, (False, "Movie already in watched history"))
@@ -60,8 +84,9 @@ class TestAddToWatchedHistory(unittest.TestCase):
         Test adding a movie that is not in the database with a different movie.
         """
         create_account(self.db, "user6@test.com", "user6", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         result = add_to_watched_history(self.db, user_id, "tt0000000", None)
         self.assertEqual(result, (False, "Movie not found"))
 
@@ -70,8 +95,9 @@ class TestAddToWatchedHistory(unittest.TestCase):
         Test adding multiple movies successfully.
         """
         create_account(self.db, "user7@test.com", "user7", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         movies = ["tt0109830", "tt0169547"]
         for movie in movies:
             result = add_to_watched_history(self.db, user_id, movie, None)
@@ -82,8 +108,9 @@ class TestAddToWatchedHistory(unittest.TestCase):
         Test adding a movie with a provided timestamp.
         """
         create_account(self.db, "user8@test.com", "user8", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         result = add_to_watched_history(
             self.db, user_id, "tt0033467", "2024-11-23 12:00:00"
         )
@@ -94,8 +121,9 @@ class TestAddToWatchedHistory(unittest.TestCase):
         Test adding a movie without a timestamp.
         """
         create_account(self.db, "user9@test.com", "user9", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         result = add_to_watched_history(self.db, user_id, "tt0168629", None)
         self.assertEqual(result, (True, "Movie added to watched history"))
 
@@ -104,8 +132,9 @@ class TestAddToWatchedHistory(unittest.TestCase):
         Test adding a movie to watched history for the same user multiple times.
         """
         create_account(self.db, "user10@test.com", "user10", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         add_to_watched_history(self.db, user_id, "tt0168629", None)
         result = add_to_watched_history(self.db, user_id, "tt0168629", None)
         self.assertEqual(result, (False, "Movie already in watched history"))
@@ -122,8 +151,9 @@ class TestAddToWatchedHistory(unittest.TestCase):
         Test trying to add a movie that doesn't exist in the database.
         """
         create_account(self.db, "user11@test.com", "user11", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         result = add_to_watched_history(self.db, user_id, "tt9999999", None)
         self.assertEqual(result, (False, "Movie not found"))
 
@@ -132,8 +162,9 @@ class TestAddToWatchedHistory(unittest.TestCase):
         Test adding multiple different movies to the watched history for the same user.
         """
         create_account(self.db, "user12@test.com", "user12", "password123")
-        self.executor.execute("SELECT idUsers FROM Users;")
-        user_id = self.executor.fetchone()[0]
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
         movies = ["tt0109830", "tt0113101", "tt0094675"]
         for movie in movies:
             result = add_to_watched_history(self.db, user_id, movie, None)

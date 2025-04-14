@@ -11,10 +11,12 @@ This code is licensed under MIT license (see LICENSE for details)
 import json
 import sys
 import os
-from flask import Flask, jsonify, render_template, request, g
+from flask import Flask, jsonify, render_template, request, g, send_from_directory
 from flask_cors import CORS
 import mysql.connector
+import requests
 from dotenv import load_dotenv
+import sqlite3
 import openai  # NEW: Import OpenAI
 import requests
 from datetime import datetime, timedelta
@@ -46,6 +48,8 @@ from src.recommenderapp.utils import (
     get_discussion,
     get_username_data,
     remove_from_watchlist,
+    init_db,
+    download_thumbnails
 )
 from src.recommenderapp.search import Search
 from datetime import datetime
@@ -295,7 +299,8 @@ def search():
     term = request.form["q"]
     finder = Search()
     filtered_dict = finder.results_top_ten(term)
-    resp = jsonify(filtered_dict)
+    out = [(t["title"], os.path.join("http://localhost:5000/thumbnails", f"{t['imdb_id']}.jpg")) for t in filtered_dict]
+    resp = jsonify(out)
     resp.status_code = 200
     return resp
 
@@ -444,7 +449,7 @@ def add_movie_to_watchlist():
     print("imdb id is present")
 
     cursor = g.db.cursor()
-    cursor.execute("SELECT idMovies FROM Movies WHERE imdb_id = %s", [imdb_id])
+    cursor.execute("SELECT idMovies FROM Movies WHERE imdb_id = ?", [imdb_id])
     movie_id_result = cursor.fetchone()
     print("Selected movie.")
     if movie_id_result:
@@ -465,7 +470,7 @@ def add_movie_to_watchlist():
                 200,
             )
     else:
-        return jsonify({"status": "error", "message": "Movie not found"}), 404
+        return jsonify({"status": "error", "message": "Movie not found"}), 404
 
 
 @app.route("/watchlist", methods=["GET"])
@@ -484,13 +489,13 @@ def get_watchlist():
     Retrieves the current user's watchlist.
     """
     user_id = user[1]  # Assuming 'user' holds the currently logged-in user's ID
-    cursor = g.db.cursor(dictionary=True)
+    cursor = g.db.cursor(sqlite3.Row)
     cursor.execute(
         """
         SELECT m.name, m.imdb_id, w.time
         FROM Watchlist w
         JOIN Movies m ON w.movie_id = m.idMovies
-        WHERE w.user_id = %s
+        WHERE w.user_id = ?
         ORDER BY w.time DESC;
         """,
         [user_id],
@@ -577,13 +582,13 @@ def get_watched_history():
     Retrieves the current user's watched history.
     """
     user_id = user[1]  # Assuming 'user' holds the currently logged-in user's ID
-    cursor = g.db.cursor(dictionary=True)
+    cursor = g.db.cursor(sqlite3.Row)
     cursor.execute(
         """
         SELECT m.name AS movie_name, m.imdb_id, wh.watched_date
         FROM WatchedHistory wh
         JOIN Movies m ON wh.movie_id = m.idMovies
-        WHERE wh.user_id = %s
+        WHERE wh.user_id = ?
         ORDER BY wh.watched_date DESC;
         """,
         [user_id],
@@ -705,18 +710,37 @@ def ai_recommendations():
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a movie recommendation AI."},
+                {"role": "system", "content": "You are a movie recommendation AI. Please provide recommendations in a JSON array format with just movie titles, the only key should be movies, I should be able to call json.loads(response.choices[0].message.content) and get a list of movies."},
                 {
-                    "role": "user",
-                    "content": f"Recommend 5 movies based on: {user_query}",
+                    "role": "user", 
+                    "content": f"Recommend 5 movies based on: {user_query}. Return just the movie titles in a JSON array."
                 },
             ],
         )
 
-        recommendations = response.choices[0].message.content.split("\n")
-        logging.debug(f"AI Recommendations: {recommendations}")
+        print(response.choices[0].message.content)
 
-        return jsonify({"recommendations": recommendations})
+        # Parse the JSON response
+        try:
+            movie_titles = json.loads(response.choices[0].message.content)["movies"]
+            recommendations = []
+            
+            # Look up each movie in database
+            for title in movie_titles:
+                print("Searching for: ", title)
+                imdb_id = get_imdb_id_by_name(g.db, title)
+                if imdb_id:
+                    recommendations.append(
+                        (title, "localhost:5000/thumbnails/" + imdb_id + ".jpg")
+                    )
+
+            logging.debug(f"AI Recommendations with thumbnails: {recommendations}")
+            print(recommendations)
+            return jsonify({"recommendations": recommendations})
+
+        except json.JSONDecodeError:
+            logging.error("Failed to parse AI response as JSON")
+            return jsonify({"error": "Invalid AI response format"}), 500
 
     except Exception as e:
         logging.error(f"Error in AI recommendations: {str(e)}", exc_info=True)
@@ -728,14 +752,13 @@ def before_request():
     """
     Opens the db connection.
     """
-    load_dotenv()
-    g.db = mysql.connector.connect(
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT", 3306),
-        database=os.getenv("DB_NAME"),
-    )
+
+    # initialize database
+    init_db()
+    
+    # Create a new connection for each request
+    g.db = sqlite3.connect('movies.db')
+    g.db.row_factory = sqlite3.Row  # This enables column access by name
 
 
 @app.after_request
@@ -743,9 +766,25 @@ def after_request(response):
     """
     Closes the db connection.
     """
-    g.db.close()
     return response
 
 
+# Add a route to serve thumbnails
+@app.route("/thumbnails/<path:filename>")
+def serve_thumbnail(filename):
+    """
+    Serves thumbnail images from the thumbnails directory.
+    """
+    PATH = os.path.join(os.path.dirname(__file__), "thumbnails")
+    thumbnail_path = os.path.join(PATH, filename)
+    if os.path.exists(thumbnail_path):
+        return send_from_directory(PATH, filename)
+    else:
+        return jsonify({"error": "Thumbnail not found"}), 404
+
+
 if __name__ == "__main__":
+    print("Downloading thumbnails... (Roughly 600MB)")
+    download_thumbnails()
+    print("Starting server...")
     app.run(port=5000)

@@ -6,7 +6,7 @@ import bcrypt
 import flask
 from dotenv import load_dotenv
 from pathlib import Path
-import mysql.connector
+import sqlite3
 import pandas as pd
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
@@ -29,14 +29,29 @@ class Tests(unittest.TestCase):
     def setUp(self):
         print("\nrunning setup method")
         load_dotenv()
-        db = mysql.connector.connect(user="root", password="root", host="127.0.0.1")
-        executor = db.cursor()
-        executor.execute("USE testDB;")
-        executor.execute("SET FOREIGN_KEY_CHECKS=0;")
-        executor.execute("DELETE FROM Users")
-        executor.execute("DELETE FROM Ratings")
-        executor.execute("DELETE FROM Friends")
-        db.commit()
+        self.db = sqlite3.connect(':memory:')
+        cursor = self.db.cursor()
+        cursor.execute("""CREATE TABLE IF NOT EXISTS Users (
+            idUsers INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )""")
+        cursor.execute("""CREATE TABLE IF NOT EXISTS Ratings (
+            user_id INTEGER,
+            movie_id INTEGER,
+            score INTEGER,
+            review TEXT,
+            time TEXT,
+            FOREIGN KEY(user_id) REFERENCES Users(idUsers)
+        )""")
+        cursor.execute("""CREATE TABLE IF NOT EXISTS Friends (
+            user_id INTEGER,
+            friend_id INTEGER,
+            FOREIGN KEY(user_id) REFERENCES Users(idUsers),
+            FOREIGN KEY(friend_id) REFERENCES Users(idUsers)
+        )""")
+        self.db.commit()
 
     def test_beautify_feedback_data(self):
         """

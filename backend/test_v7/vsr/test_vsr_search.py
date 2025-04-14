@@ -33,6 +33,7 @@ class Tests(unittest.TestCase):
         search_word = "toy"
         finder = Search()
         filtered_dict = finder.results_top_ten(search_word)
+        filtered_dict = [item['title'] for item in filtered_dict]
         expected_resp = [
             "Toy Story (1995)",
             "Toys (1992)",
@@ -47,26 +48,6 @@ class Tests(unittest.TestCase):
         ]
         self.assertTrue(filtered_dict == expected_resp)
 
-    def test_search_night(self):
-        """
-        Test case 4
-        """
-        search_word = "night"
-        finder = Search()
-        filtered_dict = finder.results_top_ten(search_word)
-        expected_resp = [
-            "Night of the living Dead (1968)",
-            "Night on Earth (1991)",
-            "Nightwatch (1997)",
-            "Night Falls on Manhattan (1996)",
-            "Nights of Cabiria (1957)",
-            "Night Shift (1982)",
-            "Night of the Comet (1984)",
-            "Nightmares (1983)",
-            "Nighthawks (1981)",
-            "Night Tide (1961)",
-        ]
-
     def test_search_2001(self):
         """
         Test case 4
@@ -74,6 +55,7 @@ class Tests(unittest.TestCase):
         search_word = "2001"
         finder = Search()
         filtered_dict = finder.results_top_ten(search_word)
+        filtered_dict = [item['title'] for item in filtered_dict]
         expected_resp = [
             "2001: A Space Odyssey (1968)",
             "2001 Maniacs (2005)",

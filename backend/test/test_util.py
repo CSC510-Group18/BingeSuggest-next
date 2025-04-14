@@ -13,9 +13,9 @@ import warnings
 import os
 import bcrypt
 import flask
+import sqlite3
 from dotenv import load_dotenv
 from pathlib import Path
-import mysql.connector
 import pandas as pd
 from unittest.mock import MagicMock, patch
 import json
@@ -52,8 +52,8 @@ class Tests(unittest.TestCase):
     """
 
     def setUp(self):
-        self.db_mock = MagicMock()
-        self.cursor_mock = MagicMock()
+        self.db_mock = MagicMock(spec=sqlite3.Connection)
+        self.cursor_mock = MagicMock(spec=sqlite3.Cursor)
         self.db_mock.cursor.return_value = self.cursor_mock
 
     def test_beautify_feedback_data(self):
@@ -240,7 +240,7 @@ class Tests(unittest.TestCase):
 
         # Check if the cursor's execute method was called to insert a new discussion
         self.cursor_mock.execute.assert_called_with(
-            "Insert INTO Discussion (imdb_id, comments) values(%s,%s)",
+            "INSERT INTO Discussion (imdb_id, comments) VALUES (?, ?)",
             (
                 data["imdb_id"],
                 json.dumps([{"user": data["user"], "comment": data["comment"]}]),
@@ -273,7 +273,7 @@ class Tests(unittest.TestCase):
 
         # Check if the cursor's execute method was called to update the discussion
         self.cursor_mock.execute.assert_called_with(
-            "Update Discussion set comments = %s where imdb_id = %s",
+            "UPDATE Discussion SET comments = ? WHERE imdb_id = ?",
             (
                 json.dumps(
                     [
@@ -347,7 +347,7 @@ class Tests(unittest.TestCase):
 
         # Verify that the cursor's execute method was called with the correct query and parameters
         self.cursor_mock.execute.assert_called_with(
-            "SELECT username FROM Users WHERE idUsers = %s;", [user_id]
+            "SELECT username FROM Users WHERE idUsers = ?;", [user_id]
         )
 
     def test_get_username_data_user_not_found(self):
@@ -365,7 +365,7 @@ class Tests(unittest.TestCase):
 
         # Ensure the cursor's execute method was called
         self.cursor_mock.execute.assert_called_with(
-            "SELECT username FROM Users WHERE idUsers = %s;", [user_id]
+            "SELECT username FROM Users WHERE idUsers = ?;", [user_id]
         )
 
     def test_get_username_data_invalid_user_id(self):
@@ -381,15 +381,15 @@ class Tests(unittest.TestCase):
         user_id = 1  # Example user ID
 
         # Simulate a database failure by raising an exception when executing the query
-        self.cursor_mock.execute.side_effect = Exception("Database error")
+        self.cursor_mock.execute.side_effect = sqlite3.Error("Database error")
 
         # Call the function and expect it to raise an exception
-        with self.assertRaises(Exception):
+        with self.assertRaises(sqlite3.Error):
             get_username_data(self.db_mock, user_id)
 
         # Ensure that the cursor's execute method was called
         self.cursor_mock.execute.assert_called_with(
-            "SELECT username FROM Users WHERE idUsers = %s;", [user_id]
+            "SELECT username FROM Users WHERE idUsers = ?;", [user_id]
         )
 
     def test_get_username_data_multiple_rows(self):
@@ -407,7 +407,7 @@ class Tests(unittest.TestCase):
         result = get_username_data(self.db_mock, user_id)
         # Ensure the cursor's execute method was called
         self.cursor_mock.execute.assert_called_with(
-            "SELECT username FROM Users WHERE idUsers = %s;", [user_id]
+            "SELECT username FROM Users WHERE idUsers = ?;", [user_id]
         )
         self.assertEqual("john_doe", result)
 
@@ -424,7 +424,7 @@ class Tests(unittest.TestCase):
 
         # Ensure the cursor's execute method was called
         self.cursor_mock.execute.assert_called_with(
-            "SELECT username FROM Users WHERE idUsers = %s;", [user_id]
+            "SELECT username FROM Users WHERE idUsers = ?;", [user_id]
         )
 
     def test_get_username_data_empty_username(self):
@@ -447,7 +447,7 @@ class Tests(unittest.TestCase):
 
         # Ensure the cursor's execute method was called
         self.cursor_mock.execute.assert_called_with(
-            "SELECT username FROM Users WHERE idUsers = %s;", [user_id]
+            "SELECT username FROM Users WHERE idUsers = ?;", [user_id]
         )
 
 
