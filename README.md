@@ -9,6 +9,9 @@
 <a href="https://img.shields.io/github/release/CSC510-Group18/BingeSuggest-next?color=brightblue" alt="Release">
 <img src="https://img.shields.io/github/release/CSC510-Group18/BingeSuggest-next?color=brightblue"/> </a>
 
+<a href="https://github.com/CSC510-Group18/BingeSuggest-next/blob/main/LICENSE">
+<img src="https://img.shields.io/github/license/CSC510-Group18/BingeSuggest-next?style=plastic"></a>
+
 
 BingeSuggest-next is a modern movie suggestion and review web application. This project is a complete rewrite by Teddy (tddschn) from the previous 1990-style jQuery/Flask version, incorporating modern React / Next.js and TypeScript practices with a rich UI. We have extended the application to be faster, more user friendly, and easier to develop for future engineers.
 
