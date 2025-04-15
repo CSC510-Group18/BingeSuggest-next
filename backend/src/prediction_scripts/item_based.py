@@ -126,13 +126,11 @@ def recommend_for_new_user(user_rating, gw, dw, aw):
         + 0.4 * top_recommendations["normalized_imdb_rating"]
     )
 
-    top_recommendations.sort_values(by="final_score", ascending=False, inplace=True)
-
     # Filter out movies the user has already rated
     rated_titles = set(user["title"])
-    top_recommendations_filtered = top_recommendations[~top_recommendations["title"].isin(rated_titles)]
+    candidates = top_recommendations[~top_recommendations["title"].isin(rated_titles)]
 
-    final_recommendations = top_recommendations_filtered.head(201)
+    final_recommendations = candidates.nlargest(201, 'final_score')
 
     return (
         list(final_recommendations["title"]),
