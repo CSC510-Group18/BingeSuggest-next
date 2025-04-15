@@ -1,5 +1,8 @@
 # BingeSuggest-next
 
+[![DOI](https://zenodo.org/badge/945669213.svg)](https://doi.org/10.5281/zenodo.15220784)
+
+
 BingeSuggest-next is a modern movie suggestion and review web application. This project is a complete rewrite by Teddy (tddschn) from the previous 1990-style jQuery/Flask version, incorporating modern React / Next.js and TypeScript practices with a rich UI. We have extended the application to be faster, more user friendly, and easier to develop for future engineers.
 
 Prevous version: https://github.com/CSC510-Group13/BingeSuggest
