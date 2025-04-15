@@ -20,7 +20,7 @@ with open("README.md", "r", encoding="utf8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="git-brwali",  # Replace with your own username
+    name="jrpowel9",  # Replace with your own username
     version="1.0.0",
     author="Robert, Brandon, Nicholas, Nathan",
     author_email="bingesuggest-next777@gmail.com",

@@ -34,28 +34,25 @@
  1. Launch MySQL Workbench
  2. Under MySQL Connections, Right click in the whitespace. Select `Rescan for Local MySQL Instances`. It should detect the server established in the previous step.
  3. Select the discovered Local instance and enter your password if created in server setup.
- 4. Click `File` > `Open SQL Script` then select `init.sql` in the `bingesuggest-next/src` directory. This will create the tables required for the application's persistence.
- 5. Repeat above step for `movies.sql` file located in the `bingesuggest-next/src` directory. This may take a few minutes.
- 6. Create .env file in the `bingesuggest-next/src/recommenderapp` directory and add the following lines:
+ 4. Create .env file in the `bingesuggest-next/src/recommenderapp` directory and add the following lines:
  
     ```
-    DB_USER = 'root'
-    DB_PASSWORD = 'your_password'
-    DB_HOST = 'localhost'
-    DB_NAME = 'bingesuggest-nextDB'
-    
     OMDB_API_KEY = <your_omdb_api_key>
-    
+
+    TRAKT_CLIENT_ID = <your_trakt_client_id>
+    TRAKT_CLIENT_SECRET = <your_trakt_client_secret>
+
     SENDER_EMAIL = <your_sender_email>
     SENDER_EMAIL_PASSWORD = <your_sender_email_password>
     SMTP_SERVER = "smtp.gmail.com"
     SMTP_PORT = 587
     ```
-    
-    Replace `your_password` with the password you created during MySQL Server setup. 
+
+    Replace `your_password` with the password you created during MySQL Server setup. It is strongly recommended that this password be 'root', as many tests expect this to be the case in order to run. If you have problems running tests, this is the first thing to try.
     Replace `<your_omdb_api_key>` with your own API key from [OMDb API](http://www.omdbapi.com/).
+    Replace `<your_trakt_client_id>` and `<your_trakt_client_secret` with your own API keys from [Trakt API](https://trakt.tv/).
     Replace `<your_sender_email>` with the email address you created for the email notifier feature.
-    Replace `<your_sender_email_password>` with the password for the email address you created for the email notifier feature.
+    Replace `<your_sender_email_password>` with the password for the email address you created for the email notifier feature. In order to make this feature work, I was able to use my school email account, and create an app password through google which was in the form 'xxxx xxxx xxxx xxxx '.
    
 ## Step 6: Python Packages
    Run the following command in the terminal
