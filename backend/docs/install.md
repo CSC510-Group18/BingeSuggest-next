@@ -34,17 +34,9 @@
  1. Launch MySQL Workbench
  2. Under MySQL Connections, Right click in the whitespace. Select `Rescan for Local MySQL Instances`. It should detect the server established in the previous step.
  3. Select the discovered Local instance and enter your password if created in server setup.
- 4. Click `File` > `Open SQL Script` then select `init.sql` in the `bingesuggest-next/backend/src` directory. This will create the tables required for the application's persistence.
- 5. Repeat above step for `movies.sql` file located in the `bingesuggest-next/backend/src` directory. This may take a few minutes.
- 6. Repeat above step for `test_init.sql` file located in the `bingesuggest-next/backend/test` directory. This is required for many of the automated unit tests to run successfully.
- 7. Create .env file in the `bingesuggest-next/src/recommenderapp` directory and add the following lines:
+ 4. Create .env file in the `bingesuggest-next/src/recommenderapp` directory and add the following lines:
  
     ```
-    DB_USER = 'root'
-    DB_PASSWORD = 'your_password'
-    DB_HOST = 'localhost'
-    DB_NAME = 'bingesuggest-nextDB'
-
     OMDB_API_KEY = <your_omdb_api_key>
 
     TRAKT_CLIENT_ID = <your_trakt_client_id>
