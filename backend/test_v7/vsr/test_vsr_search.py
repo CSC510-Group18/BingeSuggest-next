@@ -188,7 +188,7 @@ class Tests(unittest.TestCase):
             "The Neverending Story III: Escape from Fantasia (1994)",
             "A Pyromaniac's Love Story (1995)"
         ]
-        self.assertEquals(filtered_dict, expected_resp)
+        self.assertEqual(filtered_dict, expected_resp)
 
     def test_search_prefix_priority(self):
         """
