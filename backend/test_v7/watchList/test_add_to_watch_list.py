@@ -152,6 +152,110 @@ class TestAddToWatchList(unittest.TestCase):
             result = add_to_watchlist(self.db, user_id, movie, None)
             self.assertTrue(result)
 
+    def test_add_movie_with_null_user_id(self):
+        """
+        Test adding a movie with a null user ID.
+        """
+        with self.assertRaises(TypeError):
+            add_to_watchlist(self.db, None, "0109830", None)
+
+    def test_add_movie_with_null_movie_id(self):
+        """
+        Test adding a movie with a null movie ID.
+        """
+        create_account(self.db, "user13@test.com", "user13", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        with self.assertRaises(TypeError):
+            add_to_watchlist(self.db, user_id, None, None)
+
+    def test_add_movie_with_empty_movie_id(self):
+        """
+        Test adding a movie with an empty movie ID.
+        """
+        create_account(self.db, "user14@test.com", "user14", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        with self.assertRaises(ValueError):
+            add_to_watchlist(self.db, user_id, "", None)
+
+    def test_add_movie_with_special_characters_in_movie_id(self):
+        """
+        Test adding a movie with special characters in the movie ID.
+        """
+        create_account(self.db, "user15@test.com", "user15", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        with self.assertRaises(ValueError):
+            add_to_watchlist(self.db, user_id, "tt@#$%^", None)
+
+    def test_add_movie_with_large_movie_id(self):
+        """
+        Test adding a movie with a very large movie ID.
+        """
+        create_account(self.db, "user16@test.com", "user16", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        with self.assertRaises(OverflowError):
+            add_to_watchlist(self.db, user_id, "12345678901234567890", None)
+
+    def test_add_movie_with_invalid_timestamp_format(self):
+        """
+        Test adding a movie with an invalid timestamp format.
+        """
+        create_account(self.db, "user17@test.com", "user17", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = add_to_watchlist(self.db, user_id, "0109830", "invalid-timestamp")
+        self.assertTrue(result)
+
+    def test_add_movie_with_duplicate_entries(self):
+        """
+        Test adding a movie with duplicate entries in the watchlist.
+        """
+        create_account(self.db, "user18@test.com", "user18", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        add_to_watchlist(self.db, user_id, "0109830", None)
+        result = add_to_watchlist(self.db, user_id, "0109830", None)
+        self.assertFalse(result)
+
+    def test_add_movie_with_sql_injection_attempt(self):
+        """
+        Test adding a movie with an SQL injection attempt in the movie ID.
+        """
+        create_account(self.db, "user19@test.com", "user19", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        with self.assertRaises(ValueError):
+            add_to_watchlist(self.db, user_id, "1234567; DROP TABLE Watchlist;", None)
+
+    def test_add_movie_with_empty_database(self):
+        """
+        Test adding a movie when the database is empty.
+        """
+        create_account(self.db, "user20@test.com", "user20", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("DELETE FROM Watchlist")
+        self.db.commit()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = add_to_watchlist(self.db, user_id, "0109830", None)
+        self.assertTrue(result)
+
+    def test_add_movie_with_nonexistent_user(self):
+        """
+        Test adding a movie with a user ID that does not exist in the database.
+        """
+        result = add_to_watchlist(self.db, 9999, "0109830", None)
+        self.assertTrue(result)
 
 if __name__ == "__main__":
     unittest.main()

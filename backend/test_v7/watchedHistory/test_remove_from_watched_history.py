@@ -164,6 +164,119 @@ class TestRemoveFromWatchedHistory(unittest.TestCase):
         result = remove_from_watched_history_util(self.db, user_id, "tt0076759")
         self.assertEqual(result, (True, "Movie removed from watched history"))
 
+    def test_remove_movie_with_special_characters_in_imdb_id(self):
+        """
+        Test removing a movie with special characters in the IMDb ID.
+        """
+        create_account(self.db, "user12@test.com", "user12", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = remove_from_watched_history_util(self.db, user_id, "tt@#$%^")
+        self.assertEqual(result, (False, "Movie not found"))
+
+    def test_remove_movie_with_null_user_id(self):
+        """
+        Test removing a movie with a null user ID.
+        """
+        create_account(self.db, "user13@test.com", "user13", "password123")
+        result = remove_from_watched_history_util(self.db, None, "tt0076759")
+        self.assertEqual(result, (False, "Movie not in watched history"))
+
+    def test_remove_movie_with_null_imdb_id(self):
+        """
+        Test removing a movie with a null IMDb ID.
+        """
+        create_account(self.db, "user14@test.com", "user14", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = remove_from_watched_history_util(self.db, user_id, None)
+        self.assertEqual(result, (False, "Movie not found"))
+
+    def test_remove_movie_with_large_imdb_id(self):
+        """
+        Test removing a movie with a very large IMDb ID.
+        """
+        create_account(self.db, "user15@test.com", "user15", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = remove_from_watched_history_util(self.db, user_id, "12345678901234567890")
+        self.assertEqual(result, (False, "Movie not found"))
+
+    def test_remove_movie_with_duplicate_entries(self):
+        """
+        Test removing a movie with duplicate entries in the watched history.
+        """
+        create_account(self.db, "user16@test.com", "user16", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        add_to_watched_history(self.db, user_id, "tt0076759", None)
+        add_to_watched_history(self.db, user_id, "tt0076759", None)
+        result = remove_from_watched_history_util(self.db, user_id, "tt0076759")
+        self.assertEqual(result, (True, "Movie removed from watched history"))
+
+    def test_remove_movie_with_invalid_timestamp_format(self):
+        """
+        Test removing a movie with an invalid timestamp format in the database.
+        """
+        create_account(self.db, "user17@test.com", "user17", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        add_to_watched_history(self.db, user_id, "tt0076759", "invalid-timestamp")
+        result = remove_from_watched_history_util(self.db, user_id, "tt0076759")
+        self.assertEqual(result, (True, "Movie removed from watched history"))
+
+    def test_remove_movie_with_empty_database(self):
+        """
+        Test removing a movie when the database is empty.
+        """
+        create_account(self.db, "user18@test.com", "user18", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("DELETE FROM WatchedHistory")
+        self.db.commit()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = remove_from_watched_history_util(self.db, user_id, "tt0076759")
+        self.assertEqual(result, (False, "Movie not in watched history"))
+
+    def test_remove_movie_with_sql_injection_attempt(self):
+        """
+        Test removing a movie with an SQL injection attempt in the IMDb ID.
+        """
+        create_account(self.db, "user19@test.com", "user19", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = remove_from_watched_history_util(self.db, user_id, "tt0076759; DROP TABLE WatchedHistory;")
+        self.assertEqual(result, (False, "Movie not found"))
+
+    def test_remove_movie_with_case_insensitive_imdb_id(self):
+        """
+        Test removing a movie with a case-insensitive IMDb ID.
+        """
+        create_account(self.db, "user20@test.com", "user20", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        add_to_watched_history(self.db, user_id, "tt0076759", None)
+        result = remove_from_watched_history_util(self.db, user_id, "TT0076759")
+        self.assertEqual(result, (False, "Movie not found"))
+
+    def test_remove_movie_with_partial_imdb_id(self):
+        """
+        Test removing a movie with a partial IMDb ID.
+        """
+        create_account(self.db, "user21@test.com", "user21", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        add_to_watched_history(self.db, user_id, "tt0076759", None)
+        result = remove_from_watched_history_util(self.db, user_id, "0076759")
+        self.assertEqual(result, (False, "Movie not found"))
 
 if __name__ == "__main__":
     unittest.main()
