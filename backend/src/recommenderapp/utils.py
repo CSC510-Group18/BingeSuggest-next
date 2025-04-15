@@ -11,7 +11,6 @@ import json
 import shutil
 import tempfile
 import zipfile
-
 import pandas as pd
 import os
 import sqlite3
@@ -279,19 +278,10 @@ def send_email_to_user(recipient_email, categorized_data):
                         </html>
                         """
 
-    # Email configuration
-    smtp_server = "smtp.gmail.com"
-    # Port for TLS
-    smtp_port = 587
-    sender_email = os.getenv("SENDER_EMAIL")
-
-    # Use an app password since 2-factor authentication is enabled
-    sender_password = os.getenv("SENDER_EMAIL_PASSWORD")
     subject = "Your movie recommendation from BingeSuggest"
 
     # Create the email message
     message = MIMEMultipart("alternative")
-    message["From"] = sender_email
     message["To"] = recipient_email
     message["Subject"] = subject
     # Load the CSV file into a DataFrame
@@ -319,6 +309,68 @@ def send_email_to_user(recipient_email, categorized_data):
 
     # Attach the HTML email body
     message.attach(MIMEText(html_content, "html"))
+    send_email(message, recipient_email)
+
+
+def format_trakt_movies_to_html(movies):
+    """
+    Format a list of movies into plain HTML for email content.
+
+    Args:
+        movies (list): List of movie dictionaries (output from get_recent_movies_from_trakt())
+
+    Returns:
+        str: HTML formatted string
+    """
+    if not movies:
+        return "<p>No movies found.</p>"
+
+    html_content = """
+    <html>
+        <body>
+            <h1>Top 10 Trending Movies This Week</h1>
+            <table border="1" cellpadding="5" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>IMDb</th>
+                    </tr>
+                </thead>
+                <tbody>
+    """
+
+    for movie in movies:
+        imdb_url = f"https://www.imdb.com/title/{movie['imdb_id']}/"
+        html_content += f"""
+                    <tr>
+                        <td>{movie['title']}</td>
+                        <td><a href="{imdb_url}">View on IMDb</a></td>
+                    </tr>
+        """
+
+    html_content += """
+                </tbody>
+            </table>
+            <p><em>This is an automated email. Please do not reply directly to this message.</em></p>
+        </body>
+    </html>
+    """
+
+    return html_content
+
+
+def send_email(email: MIMEMultipart, recipient_email):
+    # Email configuration
+    smtp_server = os.getenv("SMTP_SERVER")
+    # Port for TLS
+    smtp_port = 587
+    sender_email = os.getenv("SENDER_EMAIL")
+
+    # Use an app password since 2-factor authentication is enabled
+    sender_password = os.getenv("SENDER_EMAIL_PASSWORD")
+
+    # Create the email message
+    email["From"] = sender_email
 
     # Connect to the SMTP server
     try:
@@ -328,8 +380,7 @@ def send_email_to_user(recipient_email, categorized_data):
         server.login(sender_email, sender_password)
 
         # Send the email
-        server.sendmail(sender_email, recipient_email, message.as_string())
-        logging.info("Email sent successfully!")
+        server.sendmail(sender_email, recipient_email, email.as_string())
 
     except SMTPException as e:
         # Handle SMTP-related exceptions

@@ -13,14 +13,23 @@ import sys
 import os
 from flask import Flask, jsonify, render_template, request, g, send_from_directory
 from flask_cors import CORS
+import mysql.connector
 import requests
 from dotenv import load_dotenv
 import sqlite3
 import openai  # NEW: Import OpenAI
+import requests
+from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 sys.path.append("../../")
 from src.recommenderapp.utils import (
     beautify_feedback_data,
+    format_trakt_movies_to_html,
+    send_email,
     send_email_to_user,
     create_account,
     login_to_account,
@@ -63,6 +72,92 @@ comments: []
 # Load environment variables early so that OpenAI API key is available.
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")  # NEW: Set the OpenAI API key
+
+def get_recent_movies_from_trakt():
+    """Fetch top 10 new movies from the past month using Trakt API"""
+    try:
+
+        TRAKT_CLIENT_ID = os.getenv("TRAKT_CLIENT_ID")
+        TRAKT_CLIENT_SECRET = os.getenv("TRAKT_CLIENT_SECRET")
+        URL = "https://api.trakt.tv/movies/trending"
+
+        # Headers for the API request
+        headers = {
+            "Content-Type": "application/json",
+            "trakt-api-version": "2",
+            "trakt-api-key": TRAKT_CLIENT_ID,
+            "trakt-api-secret": TRAKT_CLIENT_SECRET
+        }
+
+        # Make the API request
+        response = requests.get(URL, headers=headers)
+        movies = response.json()
+
+        return [{
+            "title": movie['movie']["title"],
+            "imdb_id": movie['movie']["ids"]["imdb"]
+        } for movie in movies[:10]]
+
+    except Exception as e:
+        app.logger.error(f"Error fetching movies from Trakt: {str(e)}")
+        return []
+
+
+def send_weekly_recommendations():
+    """Sends weekly recommendations to all users"""
+    with app.app_context():
+        try:
+            recent_movies = format_trakt_movies_to_html(get_recent_movies_from_trakt())
+            if not recent_movies:
+                app.logger.error("No movies found from Trakt API")
+                return
+
+            # Get all users with emails
+            db = mysql.connector.connect(
+                user=os.getenv("DB_USER"),
+                password=os.getenv("DB_PASSWORD"),
+                host=os.getenv("DB_HOST"),
+                port=os.getenv("DB_PORT", 3306),
+                database=os.getenv("DB_NAME"),
+            )
+            cursor = db.cursor()
+            cursor.execute("SELECT email FROM Users WHERE email IS NOT NULL;")
+            users = cursor.fetchall()
+            db.close()
+
+            # Send emails to all users
+            print('starting email sending')
+            for (email_address,) in users:
+                try:
+                    email = MIMEMultipart("alternative")
+                    email["To"] = email_address
+                    email["Subject"] = "Newly Released Movies for You"
+                    email.attach(MIMEText(recent_movies, "html"))
+
+                    send_email(email, email_address)
+
+                    app.logger.info(f"Sent recommendations to {email_address}")
+                except Exception as e:
+                    app.logger.error(f"Error sending email to {email_address}: {str(e)}")
+
+        except Exception as e:
+            app.logger.error(f"Error in weekly recommendations: {str(e)}")
+
+
+# Run every Monday at 9 AM
+scheduler = BackgroundScheduler(daemon=True)
+scheduler.add_job(
+    send_weekly_recommendations,
+    trigger=CronTrigger(
+        day_of_week="mon",
+        hour=9,
+        minute=0,
+        timezone="UTC",
+        week="*/4"  # Send updates once a month
+    ),
+    name="Weekly Recommendations"
+)
+scheduler.start()
 
 
 @app.route("/")
