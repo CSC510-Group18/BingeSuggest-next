@@ -170,6 +170,115 @@ class TestAddToWatchedHistory(unittest.TestCase):
             result = add_to_watched_history(self.db, user_id, movie, None)
             self.assertEqual(result, (True, "Movie added to watched history"))
 
+    def test_add_movie_with_null_user_id(self):
+        """
+        Test adding a movie with a null user ID.
+        """
+        result = add_to_watched_history(self.db, None, "tt0109830", None)
+        self.assertEqual(result, (True, "Movie added to watched history"))
+
+    def test_add_movie_with_null_imdb_id(self):
+        """
+        Test adding a movie with a null IMDb ID.
+        """
+        create_account(self.db, "user13@test.com", "user13", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = add_to_watched_history(self.db, user_id, None, None)
+        self.assertEqual(result, (False, "Movie not found"))
+
+    def test_add_movie_with_empty_imdb_id(self):
+        """
+        Test adding a movie with an empty IMDb ID.
+        """
+        create_account(self.db, "user14@test.com", "user14", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = add_to_watched_history(self.db, user_id, "", None)
+        self.assertEqual(result, (False, "Movie not found"))
+
+
+    def test_add_movie_with_special_characters_in_imdb_id(self):
+        """
+        Test adding a movie with special characters in the IMDb ID.
+        """
+        create_account(self.db, "user15@test.com", "user15", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = add_to_watched_history(self.db, user_id, "tt@#$%^", None)
+        self.assertEqual(result, (False, "Movie not found"))
+
+    def test_add_movie_with_large_imdb_id(self):
+        """
+        Test adding a movie with a very large IMDb ID.
+        """
+        create_account(self.db, "user16@test.com", "user16", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = add_to_watched_history(self.db, user_id, "12345678901234567890", None)
+        self.assertEqual(result, (False, "Movie not found"))
+
+    def test_add_movie_with_invalid_timestamp_format(self):
+        """
+        Test adding a movie with an invalid timestamp format.
+        """
+        create_account(self.db, "user17@test.com", "user17", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = add_to_watched_history(self.db, user_id, "tt0109830", "invalid-timestamp")
+        self.assertEqual(result, (True, "Movie added to watched history"))
+        
+
+    def test_add_movie_with_sql_injection_attempt(self):
+        """
+        Test adding a movie with an SQL injection attempt in the IMDb ID.
+        """
+        create_account(self.db, "user18@test.com", "user18", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = add_to_watched_history(self.db, user_id, "tt0076759; DROP TABLE WatchedHistory;", None)
+        self.assertEqual(result, (False, "Movie not found"))
+
+    def test_add_movie_with_empty_database(self):
+        """
+        Test adding a movie when the database is empty.
+        """
+        create_account(self.db, "user19@test.com", "user19", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("DELETE FROM Movies")
+        self.db.commit()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = add_to_watched_history(self.db, user_id, "tt0109830", None)
+        self.assertEqual(result, (False, "Movie not found"))
+
+    def test_add_movie_with_case_insensitive_imdb_id(self):
+        """
+        Test adding a movie with a case-insensitive IMDb ID.
+        """
+        create_account(self.db, "user20@test.com", "user20", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = add_to_watched_history(self.db, user_id, "TT0109830", None)
+        self.assertEqual(result, (False, "Movie not found"))
+
+    def test_add_movie_with_partial_imdb_id(self):
+        """
+        Test adding a movie with a partial IMDb ID.
+        """
+        create_account(self.db, "user21@test.com", "user21", "password123")
+        cursor = self.db.cursor()
+        cursor.execute("SELECT idUsers FROM Users")
+        user_id = cursor.fetchone()[0]
+        result = add_to_watched_history(self.db, user_id, "0109830", None)
+        self.assertEqual(result, (False, "Movie not found"))
 
 if __name__ == "__main__":
     unittest.main()
