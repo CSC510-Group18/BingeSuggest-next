@@ -1,6 +1,6 @@
 # BingeSuggest-next
 
-BingeSuggest-next is a modern movie suggestion and review web application. This project is a complete rewrite by Teddy (tddschn) from the previous 1990-style jQuery/Flask version, incorporating modern React / Next.js and TypeScript practices with a rich UI.
+BingeSuggest-next is a modern movie suggestion and review web application. This project is a complete rewrite by Teddy (tddschn) from the previous 1990-style jQuery/Flask version, incorporating modern React / Next.js and TypeScript practices with a rich UI. We have extended the application to be faster, more user friendly, and easier to develop for future engineers.
 
 Prevous version: https://github.com/CSC510-Group13/BingeSuggest
 
@@ -21,14 +21,10 @@ Prevous version: https://github.com/CSC510-Group13/BingeSuggest
 
 ## Demo
 
+[Demo Video](https://drive.google.com/file/d/18EnE-xooV2McsirnXATbysHrqtNRHbj8/view?usp=sharing)
 
-<!-- <iframe src="https://drive.google.com/file/d/1-dDDALwgS7VVANqMezGMK5_OEquLFFK5/preview" width="640" height="480" allow="autoplay"></iframe> -->
 
-We also compared this version to prevous version of BingeSuggest. The new version is a complete rewrite using modern technologies and practices, resulting in a more efficient and user-friendly application.
-
-[![](https://cdn.discordapp.com/attachments/1332562207741055056/1344138393403133994/CleanShot-2025-02-25-21.45.59.png?ex=67bfd1ed&is=67be806d&hm=33944122ee61a337020f84dd6f57201c93379c1ffb491a6f0a919e2089f620d5&)](https://drive.google.com/file/d/1-dDDALwgS7VVANqMezGMK5_OEquLFFK5/view?usp=sharing)
-
-Click on the image to view the demo video. The video showcases the new features and improvements in BingeSuggest-next, including the new UI, performance enhancements, and additional functionalities.
+Click on the link to view the demo video. The video showcases the new features and improvements in BingeSuggest-next, including the UI improvements, performance enhancements, and additional functionalities.
 
 ## Features
 
@@ -41,21 +37,15 @@ Click on the image to view the demo video. The video showcases the new features 
 
 ## Improvements over the previous version
 
-- Performance: Converted code to now a Single Page Application (SPA), utilizing client-side navigation that allows users to navigate to different part of the app at the speed of light. A significant performance increase of over 1000x on some pages!
-- Friends: Users can now add friends and browse their watch history.
-- Movie Search: New and intuitive "Search" tab that expands off the previous iterations "Recommendations" tab. Search movies fast with this new feature!
-- Recommendation: Users now have access to AI-powered movie recommendation assistance through our Recommendation Genie.
-- UI Enhancements: Frontend rewritten from scratch featuring a new modern UI design. Migrated from jQuery to React, Bun, TypeScript, Tailwind, and many other newer technologies. Intuitive interface and layout!
-- Dark Mode: Users now have access to a dark mode toggle at the top right.
-- Guest Users: It is now clear to guest users their approved features. Features they cannot access have restrictions. Different views for guests and users. No more error messages as a guest!
+- Performance: Cache work from the first recommendation of a session to make future recommendations take significantly less time.
+- Thumbnails: Search tab and display genie now displays thumbnails so users can be more sure of the movie they are looking up.
+- Database migration: Moving from MySQL to sqlite3 will make it easier for future developers to work on this application with increase velocity.
 - Various Bug Fixes
 
 ## Running the Backend
 
-Using gunicorn instead of vanilla Flask for better performance and scalability.
-
 ```
-cd backend/src/recommenderapp && gunicorn app:app -b localhost:5000
+cd backend/src/recommenderapp && python3 app.py
 ```
 
 ## Running the Frontend
