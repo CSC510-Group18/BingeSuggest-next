@@ -550,8 +550,10 @@ def get_friends(db, user):
     """
     executor = db.cursor()
     executor.execute(
-        "SELECT username FROM Users AS u \
-                     JOIN Friends AS f ON u.idUsers = f.friend_id WHERE f.user_id = ?;",
+        "SELECT u.username \
+            FROM Users AS u \
+            JOIN Friends AS f ON u.idUsers = f.idFriend \
+            WHERE f.idUsers = ?;",
         [int(user)],
     )
     result = executor.fetchall()
