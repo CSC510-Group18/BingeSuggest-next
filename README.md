@@ -100,10 +100,10 @@ This command creates a gist (with modifications) for easy sharing and deployment
 
 ```bibtex
 @software{BingeSuggest-next,
-  author = {Ryan Mikula and Teddy Chen and Mulikatu Yakubu},
+  author = {Jakub Jon and Jeff Powell and Zeiad Yakout},
   title = {BingeSuggest-next},
   year = {2025},
-  url = {https://github.com/CSC510-Group13/BingeSuggest},
+  url = {https://github.com/CSC510-Group18/BingeSuggest},
   note = {A modern movie suggestion and review web application.}
 }
 ```
