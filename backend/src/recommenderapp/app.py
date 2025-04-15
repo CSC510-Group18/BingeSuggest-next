@@ -13,7 +13,6 @@ import sys
 import os
 from flask import Flask, jsonify, render_template, request, g, send_from_directory
 from flask_cors import CORS
-import mysql.connector
 import requests
 from dotenv import load_dotenv
 import sqlite3
@@ -24,6 +23,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.date import DateTrigger
 
 sys.path.append("../../")
 from src.recommenderapp.utils import (
@@ -113,17 +113,11 @@ def send_weekly_recommendations():
                 return
 
             # Get all users with emails
-            db = mysql.connector.connect(
-                user=os.getenv("DB_USER"),
-                password=os.getenv("DB_PASSWORD"),
-                host=os.getenv("DB_HOST"),
-                port=os.getenv("DB_PORT", 3306),
-                database=os.getenv("DB_NAME"),
-            )
-            cursor = db.cursor()
+            before_request()
+            cursor = g.db.cursor()
             cursor.execute("SELECT email FROM Users WHERE email IS NOT NULL;")
             users = cursor.fetchall()
-            db.close()
+            print('users', users)
 
             # Send emails to all users
             print('starting email sending')
@@ -148,6 +142,8 @@ def send_weekly_recommendations():
 scheduler = BackgroundScheduler(daemon=True)
 scheduler.add_job(
     send_weekly_recommendations,
+    # This was left for testing the send_weekly_recommendations function.
+    # trigger=DateTrigger(run_date=datetime.now() + timedelta(seconds=5)),
     trigger=CronTrigger(
         day_of_week="mon",
         hour=9,
@@ -489,7 +485,7 @@ def get_watchlist():
     Retrieves the current user's watchlist.
     """
     user_id = user[1]  # Assuming 'user' holds the currently logged-in user's ID
-    cursor = g.db.cursor(sqlite3.Row)
+    cursor = g.db.cursor()
     cursor.execute(
         """
         SELECT m.name, m.imdb_id, w.time
@@ -582,7 +578,7 @@ def get_watched_history():
     Retrieves the current user's watched history.
     """
     user_id = user[1]  # Assuming 'user' holds the currently logged-in user's ID
-    cursor = g.db.cursor(sqlite3.Row)
+    cursor = g.db.cursor()
     cursor.execute(
         """
         SELECT m.name AS movie_name, m.imdb_id, wh.watched_date
