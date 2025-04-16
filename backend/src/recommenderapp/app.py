@@ -359,8 +359,9 @@ def review():
     Handles the submission of a movie review
     """
     data = request.get_json()
-    movie_name = data.get("movie")
+    movie_name = data.get("movie")[0]
     data["imdb_id"] = get_imdb_id_by_name(g.db, movie_name)
+    print(get_imdb_id_by_name(g.db, movie_name))
     submit_review(g.db, user[1], movie_name, data.get("score"), data.get("review"))
     return request.data
 
@@ -434,7 +435,7 @@ def add_movie_to_watchlist():
     print("Entered func")
     data = request.get_json()
     print(data)
-    movie_name = data.get("movieName")
+    movie_name = data.get("movieName")[0]
     print(movie_name)
     imdb_id = (
         get_imdb_id_by_name(g.db, movie_name) if movie_name else data.get("imdb_id")
@@ -545,7 +546,7 @@ def add_movie_to_watched_history():
     # Get IMDb ID or movie name
     imdb_id = data.get("imdb_id")
     if not imdb_id:
-        movie_name = data.get("movieName")
+        movie_name = data.get("movieName")[0]
         imdb_id = get_imdb_id_by_name(g.db, movie_name) if movie_name else None
 
     if not imdb_id:
@@ -664,7 +665,7 @@ def get_imdb_id():
     Fetches the IMDb ID for a given movie title.
     """
     data = request.get_json()
-    movie_name = data.get("movie_name")
+    movie_name = data.get("movie_name")[0]
 
     if not movie_name:
         return jsonify({"error": "Missing movie name"}), 400
